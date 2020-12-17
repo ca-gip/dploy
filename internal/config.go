@@ -1,4 +1,4 @@
-package services
+package internal
 
 import (
 	"github.com/fsnotify/fsnotify"
