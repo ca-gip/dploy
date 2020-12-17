@@ -1,2 +1,6 @@
+github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
+github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
+github.com/relex/aini v1.2.1 h1:EN89emh21lgFi5BlLlMEB6IfZKbQ4kUD4vOXyla/Ewk=
+github.com/relex/aini v1.2.1/go.mod h1:oFQyhvkzwi8GChiLukpBHkV2v142ls2L1MTeOSD2vic=
 gopkg.in/ini.v1 v1.62.0 h1:duBzk771uxoUuOlyRLkHsygud9+5lrlGjdFBb4mSKDU=
 gopkg.in/ini.v1 v1.62.0/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=
