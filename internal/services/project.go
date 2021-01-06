@@ -39,11 +39,16 @@ func ConditionEval(left, right, op string) bool {
 }
 
 func AllTrue(a map[string]bool) bool {
+	if len(a) == 0 {
+		return false
+	}
+
 	for _, value := range a {
 		if !value {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -52,12 +57,15 @@ func (project *Project) FilterFromVars(filters []string) (filtered []*Inventory)
 		if inventory.Data != nil {
 
 			type condition = string
-			matchFilter := make(map[condition]bool, len(filters))
+			matchFilter := make(map[condition]bool)
 
 			for _, filter := range filters {
 				key, op, value := ParseFilter(filter)
-				if ConditionEval(inventory.Data.Groups["all"].Vars[key], value, op) {
+				inventoryValue := inventory.Data.Groups["all"].Vars[key]
+				if ConditionEval(inventoryValue, value, op) {
 					matchFilter[filter] = true
+				} else {
+					matchFilter[filter] = false
 				}
 			}
 
