@@ -9,11 +9,14 @@ import (
 func main() {
 
 	home, _ := os.UserHomeDir()
-	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube/inventories")
+	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube/inventories/")
 
 	k8s := project.NewInventory(path)
 
-	filter := map[string]string{"customer": "cagip", "network_name_suffix": "k8s"}
-	fmt.Print(k8s.FilterByVarsOr(filter))
+	filter := map[string]string{"customer": "cagip"}
+	fmt.Println("Filtering ", len(filter), "/", len(k8s.Inventories))
+	for _, i := range k8s.FilterByVarsOr(filter) {
+		fmt.Println(i.FilePath, "of", len(k8s.Inventories))
+	}
 
 }

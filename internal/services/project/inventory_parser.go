@@ -2,6 +2,7 @@ package project
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/karrick/godirwalk"
 	"github.com/relex/aini"
 	"os"
@@ -9,23 +10,21 @@ import (
 	"strings"
 )
 
-type Inventory struct {
-	Name     string
-	Path     string
-	IsGroup  bool
-	Children []*Inventory
-	Parent   *Inventory
+type InventoryPath struct {
+	FilePath string
+	PathTags []string
 	Data     *aini.InventoryData
 }
 
-func scanInventoryDir(rootPath string) (result *Inventory, err error) {
+// Gather inventory files from a Parent directory
+// Using a recursive scan. All non inventory files are ignored ( not .ini file )
+// All sub parent directory added like label in the inventory
+func scanFlatInventoryDir(rootPath string, pathTags ...string) (result []*InventoryPath, err error) {
 	absRoot, err := filepath.Abs(rootPath)
 
 	if err != nil {
 		return
 	}
-
-	parents := make(map[string]*Inventory)
 
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
@@ -33,12 +32,15 @@ func scanInventoryDir(rootPath string) (result *Inventory, err error) {
 				return godirwalk.SkipThis
 			}
 
-			parents[osPathname] = &Inventory{
-				Name:     filepath.Base(osPathname),
-				Path:     osPathname,
-				Children: make([]*Inventory, 0),
+			if !strings.Contains(filepath.Base(osPathname), ".ini") {
+				return nil
 			}
+			pathMetas := strings.Split(strings.TrimSuffix(strings.TrimPrefix(osPathname, absRoot), fmt.Sprintf("/%s", de.Name())), "/")
 
+			result = append(result, &InventoryPath{
+				FilePath: osPathname,
+				PathTags: pathMetas,
+			})
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
@@ -46,62 +48,33 @@ func scanInventoryDir(rootPath string) (result *Inventory, err error) {
 		},
 		Unsorted: true,
 	})
-
-	for path, inventory := range parents {
-		parent, _ := parents[filepath.Dir(path)]
-		if strings.EqualFold(path, absRoot) {
-			result = inventory
-		} else {
-			inventory.Parent = parent
-			parent.Children = append(parent.Children, inventory)
-		}
-
-	}
-
 	return
 }
 
-func markInventoryGroup(root *Inventory) {
-	if root == nil {
+func (path *InventoryPath) parseInventory() {
+	if path == nil {
 		return
 	}
 
-	if len(root.Children) <= 1 {
-		root.IsGroup = false
-	} else {
-		root.IsGroup = true
-	}
-
-	for _, child := range root.Children {
-		markInventoryGroup(child)
-	}
-
-	return
-
-}
-
-func parseInventory(root *Inventory) {
-	if root == nil {
-		return
-	}
-
-	if strings.Contains(filepath.Base(root.Path), ".ini") {
-		if file, err := os.Open(root.Path); err == nil {
+	if strings.Contains(filepath.Base(path.FilePath), ".ini") {
+		if file, err := os.Open(path.FilePath); err == nil {
 			reader := bufio.NewReader(file)
 			if data, err := aini.Parse(reader); err == nil {
-				root.Data = data
+				path.Data = data
 			}
 		}
 	}
-
-	for _, child := range root.Children {
-		parseInventory(child)
-	}
 }
 
-func NewInventory(rootPath string) (inventory *Inventory) {
-	inventory, _ = scanInventoryDir(rootPath)
-	markInventoryGroup(inventory)
-	parseInventory(inventory)
+func NewInventory(rootPath string) (project Project) {
+	project = Project{
+		Name:        rootPath,
+		Inventories: nil,
+	}
+	inventories, _ := scanFlatInventoryDir(rootPath)
+	for _, inventory := range inventories {
+		inventory.parseInventory()
+	}
+	project.Inventories = inventories
 	return
 }
