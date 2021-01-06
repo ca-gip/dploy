@@ -1,4 +1,4 @@
-package project
+package services
 
 import (
 	"bufio"
@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type InventoryPath struct {
+type Inventory struct {
 	FilePath string
 	PathTags []string
 	Data     *aini.InventoryData
@@ -19,7 +19,7 @@ type InventoryPath struct {
 // Gather inventory files from a Parent directory
 // Using a recursive scan. All non inventory files are ignored ( not .ini file )
 // All sub parent directory added like label in the inventory
-func scanFlatInventoryDir(rootPath string, pathTags ...string) (result []*InventoryPath, err error) {
+func readInventories(rootPath string, pathTags ...string) (result []*Inventory, err error) {
 	absRoot, err := filepath.Abs(rootPath)
 
 	if err != nil {
@@ -37,7 +37,7 @@ func scanFlatInventoryDir(rootPath string, pathTags ...string) (result []*Invent
 			}
 			pathMetas := strings.Split(strings.TrimSuffix(strings.TrimPrefix(osPathname, absRoot), fmt.Sprintf("/%s", de.Name())), "/")
 
-			result = append(result, &InventoryPath{
+			result = append(result, &Inventory{
 				FilePath: osPathname,
 				PathTags: pathMetas,
 			})
@@ -51,7 +51,7 @@ func scanFlatInventoryDir(rootPath string, pathTags ...string) (result []*Invent
 	return
 }
 
-func (path *InventoryPath) parseInventory() {
+func (path *Inventory) make() {
 	if path == nil {
 		return
 	}
@@ -64,17 +64,4 @@ func (path *InventoryPath) parseInventory() {
 			}
 		}
 	}
-}
-
-func NewInventory(rootPath string) (project Project) {
-	project = Project{
-		Name:        rootPath,
-		Inventories: nil,
-	}
-	inventories, _ := scanFlatInventoryDir(rootPath)
-	for _, inventory := range inventories {
-		inventory.parseInventory()
-	}
-	project.Inventories = inventories
-	return
 }

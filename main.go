@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/ca-gip/dploy/internal/services/project"
+	"github.com/ca-gip/dploy/internal/services"
 	"os"
 )
 
@@ -11,7 +11,7 @@ func main() {
 	home, _ := os.UserHomeDir()
 	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube/inventories/")
 
-	k8s := project.NewInventory(path)
+	k8s := services.LoadFromPath(path)
 
 	filter := map[string]string{"customer": "cagip"}
 	filteredInventories := k8s.FilterByVarsOr(filter)
