@@ -1,12 +1,9 @@
 package services
 
 import (
+	"fmt"
 	"log"
 )
-
-type Playbook struct {
-	Name string
-}
 
 type Project struct {
 	Name        string
@@ -32,17 +29,25 @@ func (project *Project) FilterByVarsOr(filters map[string]string) (filtered []*I
 }
 
 // TODO: Add assert on file system ( readable, permissions ...)
-func LoadFromPath(rootPath string) (project Project) {
+func LoadFromPath(inventoryPath string, playbookPath string) (project Project) {
 	project = Project{
-		Name: rootPath,
+		Name:      inventoryPath,
+		Playbooks: nil,
 	}
-	inventories, err := readInventories(rootPath)
-	if err != nil {
-		log.Fatalln("Cannot parse directory: ", err.Error())
+	fmt.Println(playbookPath)
+	playbooks, errPlaybooks := readPlaybook(playbookPath)
+	inventories, errInventories := readInventories(inventoryPath)
+	project.Playbooks = playbooks
+	project.Inventories = inventories
+
+	if errPlaybooks != nil {
+		log.Fatalln("Cannot parse directory for playbooks: ", errPlaybooks.Error())
+	}
+	if errInventories != nil {
+		log.Fatalln("Cannot parse directory for inventories: ", errInventories.Error())
 	}
 	for _, inventory := range inventories {
 		inventory.make()
 	}
-	project.Inventories = inventories
 	return
 }

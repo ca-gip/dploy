@@ -16,6 +16,21 @@ type Inventory struct {
 	Data     *aini.InventoryData
 }
 
+func (path *Inventory) make() {
+	if path == nil {
+		return
+	}
+
+	if strings.Contains(filepath.Base(path.FilePath), ".ini") {
+		if file, err := os.Open(path.FilePath); err == nil {
+			reader := bufio.NewReader(file)
+			if data, err := aini.Parse(reader); err == nil {
+				path.Data = data
+			}
+		}
+	}
+}
+
 // Gather inventory files from a Parent directory
 // Using a recursive scan. All non inventory files are ignored ( not .ini file )
 // All sub parent directory added like label in the inventory
@@ -49,19 +64,4 @@ func readInventories(rootPath string, pathTags ...string) (result []*Inventory, 
 		Unsorted: true,
 	})
 	return
-}
-
-func (path *Inventory) make() {
-	if path == nil {
-		return
-	}
-
-	if strings.Contains(filepath.Base(path.FilePath), ".ini") {
-		if file, err := os.Open(path.FilePath); err == nil {
-			reader := bufio.NewReader(file)
-			if data, err := aini.Parse(reader); err == nil {
-				path.Data = data
-			}
-		}
-	}
 }
