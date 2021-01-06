@@ -14,9 +14,10 @@ func main() {
 	k8s := project.NewInventory(path)
 
 	filter := map[string]string{"customer": "cagip"}
-	fmt.Println("Filtering ", len(filter), "/", len(k8s.Inventories))
-	for _, i := range k8s.FilterByVarsOr(filter) {
-		fmt.Println(i.FilePath, "of", len(k8s.Inventories))
+	filteredInventories := k8s.FilterByVarsOr(filter)
+	fmt.Println("Filtering ", len(filteredInventories), "/", len(k8s.Inventories))
+	for _, i := range filteredInventories {
+		fmt.Println(i.FilePath)
 	}
 
 }
