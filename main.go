@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ca-gip/dploy/cmd"
 	"github.com/ca-gip/dploy/internal/services"
 	"os"
 )
@@ -20,4 +21,5 @@ func main() {
 		fmt.Println(i.FilePath)
 	}
 
+	cmd.Execute()
 }
