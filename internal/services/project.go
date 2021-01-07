@@ -8,7 +8,7 @@ import (
 )
 
 type Project struct {
-	Name        string
+	Path        string
 	Inventories []*Inventory
 	Playbooks   []*Playbook
 }
@@ -112,14 +112,14 @@ func (project *Project) GetInventoryValues(key string) (values []string) {
 }
 
 // TODO: Add assert on file system ( readable, permissions ...)
-func LoadFromPath(inventoryPath string, playbookPath string) (project Project) {
+func LoadFromPath(projectDirectory string) (project Project) {
 	project = Project{
-		Name:      inventoryPath,
+		Path:      projectDirectory,
 		Playbooks: nil,
 	}
-	fmt.Println(playbookPath)
-	playbooks, errPlaybooks := readPlaybook(playbookPath)
-	inventories, errInventories := readInventories(inventoryPath)
+	fmt.Println(projectDirectory)
+	playbooks, errPlaybooks := readPlaybook(projectDirectory)
+	inventories, errInventories := readInventories(projectDirectory)
 	project.Playbooks = playbooks
 	project.Inventories = inventories
 
