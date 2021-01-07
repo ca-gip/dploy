@@ -78,6 +78,39 @@ func (project *Project) FilterFromVars(filters []string) (filtered []*Inventory)
 	return
 }
 
+func (project *Project) GetInventoryKeys() (keys []string) {
+	uniqueKeys := make(map[string]interface{})
+	for _, inventory := range project.Inventories {
+		if inventory.Data != nil {
+			for key, _ := range inventory.Data.Groups["all"].Vars {
+				uniqueKeys[key] = nil
+			}
+		}
+	}
+
+	for key, _ := range uniqueKeys {
+		keys = append(keys, key)
+	}
+
+	return
+}
+
+func (project *Project) GetInventoryValues(key string) (values []string) {
+	uniqueValues := make(map[string]interface{})
+	for _, inventory := range project.Inventories {
+		if inventory.Data != nil {
+			value := inventory.Data.Groups["all"].Vars[key]
+			uniqueValues[value] = nil
+		}
+	}
+
+	for key, _ := range uniqueValues {
+		values = append(values, key)
+	}
+
+	return
+}
+
 // TODO: Add assert on file system ( readable, permissions ...)
 func LoadFromPath(inventoryPath string, playbookPath string) (project Project) {
 	project = Project{

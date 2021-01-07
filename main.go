@@ -1,24 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"github.com/ca-gip/dploy/cmd"
-	"github.com/ca-gip/dploy/internal/services"
-	"os"
 )
 
 func main() {
 
-	home, _ := os.UserHomeDir()
-	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube/inventories")
-	k8s := services.LoadFromPath(path, path+"/..")
-
-	filter := []string{"platform==os", "customer==cacf_corp_hors_prod"}
-	filteredInventories := k8s.FilterFromVars(filter)
-	fmt.Println("Filtering ", len(filteredInventories), "/", len(k8s.Inventories))
-	for _, i := range filteredInventories {
-		fmt.Println(i.FilePath)
-	}
+	//home, _ := os.UserHomeDir()
+	//path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube/inventories")
+	//k8s := services.LoadFromPath(path, path+"/..")
+	//
+	//filter := []string{"platform==os", "customer!=cacf_corp_hors_prod"}
+	//filteredInventories := k8s.FilterFromVars(filter)
+	//fmt.Println("Filtering ", len(filteredInventories), "/", len(k8s.Inventories))
+	//for _, i := range filteredInventories {
+	//	fmt.Println(i.FilePath)
+	//}
 
 	//fmt.Println("Playbooks")
 	//

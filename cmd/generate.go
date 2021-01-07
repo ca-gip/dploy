@@ -17,7 +17,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ca-gip/dploy/internal/services"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // generateCmd represents the generate command
@@ -57,4 +59,12 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	home, _ := os.UserHomeDir()
+	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube/inventories")
+	k8s := services.LoadFromPath(path, path+"/..")
+	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return k8s.GetInventoryKeys(), cobra.ShellCompDirectiveDefault
+	})
+
 }
