@@ -20,6 +20,7 @@ import (
 	"github.com/ca-gip/dploy/internal/services"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 )
 
 // generateCmd represents the generate command
@@ -67,53 +68,122 @@ func init() {
 	// is called directly, e.g.:
 	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
+	allowedOperators := []string{"==", "!=", "$=", "~=", "^="}
+
 	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		// key, op, value :=services.ParseFilter(toComplete)
+		key, op, value := services.ParseFilter(toComplete)
+		cobra.CompDebug(toComplete, true)
+		cobra.CompDebug(fmt.Sprintf("key:%s op:%s value:%s", key, op, value), true)
+
 		curr, _ := os.Getwd()
 		k8s := services.LoadFromPath(curr)
 
-		//availableKeys := k8s.GetInventoryKeys()
-		//
-		//if  key == "" && op == "" && value == "" {
-		//	return availableKeys, cobra.ShellCompDirectiveDefault
-		//}
-		//
-		//if  key != "" && op == "" && value == "" {
-		//	var keysCompletion []string
-		//	for _, availableKey := range availableKeys {
-		//		if strings.HasPrefix(availableKey, key) {
-		//			keysCompletion = append(keysCompletion,  availableKey)
-		//		}
-		//
-		//	}
-		//
-		//	cobra.CompDebugln(fmt.Sprintf("str:%s list:%s", toComplete, keysCompletion), true)
-		//
-		//	if len(keysCompletion) == 1 {
-		//		if strings.EqualFold(keysCompletion[0], strings.TrimSpace(toComplete)) {
-		//			return []string{"==", "!="}, cobra.ShellCompDirectiveDefault
-		//		}
-		//	}
-		//
-		//	if len(keysCompletion) == 0 {
-		//		return []string{"==", "!="}, cobra.ShellCompDirectiveDefault
-		//	}
-		//
-		//	return keysCompletion, cobra.ShellCompDirectiveDefault
-		//}
+		availableKeys := k8s.GetInventoryKeys()
 
-		//
-		//if key != "" && op != "" {
-		//	return k8s.GetInventoryValues(key), cobra.ShellCompDirectiveDefault
-		//}
-		//
-		//if key != "" {
-		//	return []string{"==", "!="}, cobra.ShellCompDirectiveDefault
-		//}
+		blank := key == "" && op == "" && value == ""
+		if blank {
+			return availableKeys, cobra.ShellCompDirectiveDefault
+		}
+
+		writingKey := key != "" && op == "" && value == ""
+		if writingKey {
+			var keysCompletion []string
+			for _, availableKey := range availableKeys {
+				if strings.HasPrefix(availableKey, key) {
+					keysCompletion = append(keysCompletion, availableKey)
+				}
+
+			}
+
+			if len(keysCompletion) == 1 {
+				var prefixedOperator []string
+
+				for _, allowedOperator := range allowedOperators {
+					prefixedOperator = append(prefixedOperator, fmt.Sprintf("%s%s", keysCompletion[0], allowedOperator))
+				}
+				return prefixedOperator, cobra.ShellCompDirectiveDefault
+			}
+
+			return keysCompletion, cobra.ShellCompDirectiveDefault
+		}
+
+		writingOp := key != "" && op != "" && value == ""
+		if writingOp {
+			var prefixedOperator []string
+
+			for _, allowedOperator := range allowedOperators {
+
+				if op == allowedOperator {
+					availableValues := k8s.GetInventoryValues(key)
+
+					var prefixedValues []string
+
+					for _, availableValue := range availableValues {
+
+						if availableValue != "" {
+							prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, op, availableValue))
+						}
+
+					}
+
+					return prefixedValues, cobra.ShellCompDirectiveDefault
+
+				}
+
+				if allowedOperator[0] == op[0] {
+					prefixedOperator = append(prefixedOperator, fmt.Sprintf("%s%s", key, allowedOperator))
+				}
+
+			}
+
+			if len(prefixedOperator) == 1 {
+				availableValues := k8s.GetInventoryValues(key)
+
+				_, foundOp, _ := services.ParseFilter(prefixedOperator[0])
+
+				var prefixedValues []string
+
+				for _, availableValue := range availableValues {
+
+					if availableValue != "" {
+						prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, foundOp, availableValue))
+					}
+
+				}
+
+				return prefixedValues, cobra.ShellCompDirectiveDefault
+			}
+
+			return prefixedOperator, cobra.ShellCompDirectiveDefault
+		}
+
+		writingValue := key != "" && op != "" && value != ""
+		if writingValue {
+			for _, allowedOperator := range allowedOperators {
+
+				if op == allowedOperator {
+					availableValues := k8s.GetInventoryValues(key)
+
+					var prefixedValues []string
+
+					for _, availableValue := range availableValues {
+						if availableValue != "" && strings.HasPrefix(availableValue, value) {
+							prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, op, availableValue))
+						}
+
+					}
+
+					return prefixedValues, cobra.ShellCompDirectiveDefault
+
+				}
+
+			}
+			return []string{}, cobra.ShellCompDirectiveDefault
+
+		}
 
 		return k8s.GetInventoryKeys(), cobra.ShellCompDirectiveDefault
 
 	})
-
 
 }
