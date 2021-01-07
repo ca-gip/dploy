@@ -8,7 +8,7 @@ import (
 )
 
 type Project struct {
-	Path        string
+	Path        *string
 	Inventories []*Inventory
 	Playbooks   []*Playbook
 }
@@ -114,7 +114,7 @@ func (project *Project) GetInventoryValues(key string) (values []string) {
 // TODO: Add assert on file system ( readable, permissions ...)
 func LoadFromPath(projectDirectory string) (project Project) {
 	project = Project{
-		Path:      projectDirectory,
+		Path:      &projectDirectory,
 		Playbooks: nil,
 	}
 	fmt.Println(projectDirectory)

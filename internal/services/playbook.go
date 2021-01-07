@@ -21,8 +21,13 @@ type Play struct {
 }
 
 type Playbook struct {
-	Name  string
-	Plays []Play
+	AbsolutePath string
+	RootPath     *string
+	Plays        []Play
+}
+
+func (playbook *Playbook) RelativePath() string {
+	return strings.TrimPrefix(playbook.AbsolutePath, *playbook.RootPath+"/")
 }
 
 // Gather playbook files from a Parent directory
@@ -68,7 +73,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 				return nil
 			}
 
-			result = append(result, &Playbook{Name: osPathname, Plays: plays})
+			result = append(result, &Playbook{RootPath: &rootPath, AbsolutePath: osPathname, Plays: plays})
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {

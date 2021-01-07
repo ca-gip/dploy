@@ -62,7 +62,7 @@ func init() {
 
 	home, _ := os.UserHomeDir()
 	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube/inventories")
-	k8s := services.LoadFromPath(path, path+"/..")
+	k8s := services.LoadFromPath(path)
 	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return k8s.GetInventoryKeys(), cobra.ShellCompDirectiveDefault
 	})

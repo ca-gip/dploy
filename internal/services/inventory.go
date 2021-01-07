@@ -11,9 +11,10 @@ import (
 )
 
 type Inventory struct {
-	FilePath string
-	PathTags []string
-	Data     *aini.InventoryData
+	AbsolutePath string
+	RootPath     *string
+	PathTags     []string
+	Data         *aini.InventoryData
 }
 
 func (path *Inventory) make() {
@@ -21,14 +22,18 @@ func (path *Inventory) make() {
 		return
 	}
 
-	if strings.Contains(filepath.Base(path.FilePath), ".ini") {
-		if file, err := os.Open(path.FilePath); err == nil {
+	if strings.Contains(filepath.Base(path.AbsolutePath), ".ini") {
+		if file, err := os.Open(path.AbsolutePath); err == nil {
 			reader := bufio.NewReader(file)
 			if data, err := aini.Parse(reader); err == nil {
 				path.Data = data
 			}
 		}
 	}
+}
+
+func (inventory *Inventory) RelativePath() string {
+	return strings.TrimPrefix(inventory.AbsolutePath, *inventory.RootPath+"/")
 }
 
 // Gather inventory files from a Parent directory
@@ -53,8 +58,9 @@ func readInventories(rootPath string, pathTags ...string) (result []*Inventory, 
 			pathMetas := strings.Split(strings.TrimSuffix(strings.TrimPrefix(osPathname, absRoot), fmt.Sprintf("/%s", de.Name())), "/")
 
 			result = append(result, &Inventory{
-				FilePath: osPathname,
-				PathTags: pathMetas,
+				AbsolutePath: osPathname,
+				RootPath:     &rootPath,
+				PathTags:     pathMetas,
 			})
 			return nil
 		},
