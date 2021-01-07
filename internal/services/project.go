@@ -53,6 +53,11 @@ func AllTrue(a map[string]bool) bool {
 }
 
 func (project *Project) FilterFromVars(filters []string) (filtered []*Inventory) {
+
+	if len(filters) == 0 {
+		return project.Inventories
+	}
+
 	for _, inventory := range project.Inventories {
 		if inventory.Data != nil {
 

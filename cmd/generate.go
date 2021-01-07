@@ -30,16 +30,23 @@ var generateCmd = &cobra.Command{
 TODO`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Println(cmd.Flags().GetStringArray("select"))
+		curr, _ := os.Getwd()
+		k8s := services.LoadFromPath(curr)
+		filters, _ := cmd.Flags().GetStringSlice("filter")
+		inventories := k8s.FilterFromVars(filters)
 
-		fmt.Println("generate called")
+		fmt.Println(inventories)
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringSliceP("filter", "", nil, "select inventory based on vars ex: foo==bar,bar!=foo")
+	generateCmd.Flags().StringSliceP("filter", "", nil, "filters inventory based its on vars ex: foo==bar,bar!=foo")
+	generateCmd.Flags().StringP("playbook", "p", "", "playbook to run")
+	_ = generateCmd.MarkFlagRequired("filter")
+	_ = generateCmd.MarkFlagRequired("playbook")
 
 	// Ansible params
 	generateCmd.Flags().BoolP("ask-vault-password", "", false, "ask for vault password")
@@ -60,11 +67,53 @@ func init() {
 	// is called directly, e.g.:
 	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	home, _ := os.UserHomeDir()
-	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube/inventories")
-	k8s := services.LoadFromPath(path)
 	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		// key, op, value :=services.ParseFilter(toComplete)
+		curr, _ := os.Getwd()
+		k8s := services.LoadFromPath(curr)
+
+		//availableKeys := k8s.GetInventoryKeys()
+		//
+		//if  key == "" && op == "" && value == "" {
+		//	return availableKeys, cobra.ShellCompDirectiveDefault
+		//}
+		//
+		//if  key != "" && op == "" && value == "" {
+		//	var keysCompletion []string
+		//	for _, availableKey := range availableKeys {
+		//		if strings.HasPrefix(availableKey, key) {
+		//			keysCompletion = append(keysCompletion,  availableKey)
+		//		}
+		//
+		//	}
+		//
+		//	cobra.CompDebugln(fmt.Sprintf("str:%s list:%s", toComplete, keysCompletion), true)
+		//
+		//	if len(keysCompletion) == 1 {
+		//		if strings.EqualFold(keysCompletion[0], strings.TrimSpace(toComplete)) {
+		//			return []string{"==", "!="}, cobra.ShellCompDirectiveDefault
+		//		}
+		//	}
+		//
+		//	if len(keysCompletion) == 0 {
+		//		return []string{"==", "!="}, cobra.ShellCompDirectiveDefault
+		//	}
+		//
+		//	return keysCompletion, cobra.ShellCompDirectiveDefault
+		//}
+
+		//
+		//if key != "" && op != "" {
+		//	return k8s.GetInventoryValues(key), cobra.ShellCompDirectiveDefault
+		//}
+		//
+		//if key != "" {
+		//	return []string{"==", "!="}, cobra.ShellCompDirectiveDefault
+		//}
+
 		return k8s.GetInventoryKeys(), cobra.ShellCompDirectiveDefault
+
 	})
+
 
 }
