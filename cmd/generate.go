@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/services"
 	"github.com/spf13/cobra"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -36,8 +37,33 @@ TODO`,
 		k8s := services.LoadFromPath(curr)
 		filters, _ := cmd.Flags().GetStringSlice("filter")
 		inventories := k8s.FilterFromVars(filters)
+		playbookPath, _ := cmd.Flags().GetString("playbook")
+		playbook := k8s.GetPlaybook(playbookPath)
+		if playbook == nil {
+			log.Fatalf(`%s not a valid path`, playbookPath)
+		}
 
-		fmt.Println(inventories)
+		tags, _ := cmd.Flags().GetStringSlice("tags")
+		limit, _ := cmd.Flags().GetStringSlice("limit")
+		skipTags, _ := cmd.Flags().GetStringSlice("skip-tags")
+		check, _ := cmd.Flags().GetBool("check")
+		diff, _ := cmd.Flags().GetBool("diff")
+		vaultPassFile, _ := cmd.Flags().GetString("vault-password-file")
+		askVaultPass, _ := cmd.Flags().GetBool("ask-vault-password")
+
+		commands := &services.AnsibleCommandTpl{
+			Inventory:         inventories,
+			Playbook:          playbook,
+			Tags:              tags,
+			Limit:             limit,
+			SkipTags:          skipTags,
+			Check:             check,
+			Diff:              diff,
+			VaultPasswordFile: vaultPassFile,
+			AskVaultPass:      askVaultPass,
+		}
+
+		commands.GenerateCmd()
 
 	},
 }

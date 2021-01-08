@@ -28,7 +28,7 @@ func main() {
 	//	Check:             true,
 	//	Diff:              true,
 	//	VaultPasswordFile: "/path/to/passwordfile",
-	//	AskVaultPassFile:  false,
+	//	AskVaultPass:  false,
 	//}
 	//tpl.GenerateCmd()
 
