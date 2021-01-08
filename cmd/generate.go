@@ -44,7 +44,7 @@ TODO`,
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringSliceP("filter", "", nil, "filters inventory based its on vars ex: foo==bar,bar!=foo")
+	generateCmd.Flags().StringSliceP("filter", "", nil, `filters inventory based its on vars ex: "foo==bar,bar!=foo""`)
 	generateCmd.Flags().StringP("playbook", "p", "", "playbook to run")
 	_ = generateCmd.MarkFlagRequired("filter")
 	_ = generateCmd.MarkFlagRequired("playbook")
@@ -92,7 +92,6 @@ func init() {
 				if strings.HasPrefix(availableKey, key) {
 					keysCompletion = append(keysCompletion, availableKey)
 				}
-
 			}
 
 			if len(keysCompletion) == 1 {
@@ -184,6 +183,12 @@ func init() {
 
 		return k8s.GetInventoryKeys(), cobra.ShellCompDirectiveDefault
 
+	})
+
+	_ = generateCmd.RegisterFlagCompletionFunc("playbook", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		curr, _ := os.Getwd()
+		k8s := services.LoadFromPath(curr)
+		return k8s.GetPlaybooks(), cobra.ShellCompDirectiveDefault
 	})
 
 }

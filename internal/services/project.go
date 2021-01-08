@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -83,12 +82,14 @@ func (project *Project) FilterFromVars(filters []string) (filtered []*Inventory)
 	return
 }
 
+// TODO : https://www.davidkaya.com/sets-in-golang/ ?
 func (project *Project) GetInventoryKeys() (keys []string) {
-	uniqueKeys := make(map[string]interface{})
+	var Set = struct{}{}
+	uniqueKeys := make(map[string]struct{})
 	for _, inventory := range project.Inventories {
 		if inventory.Data != nil {
 			for key, _ := range inventory.Data.Groups["all"].Vars {
-				uniqueKeys[key] = nil
+				uniqueKeys[key] = Set
 			}
 		}
 	}
@@ -116,13 +117,20 @@ func (project *Project) GetInventoryValues(key string) (values []string) {
 	return
 }
 
+func (project *Project) GetPlaybooks() (values []string) {
+	for _, playbook := range project.Playbooks {
+		values = append(values, playbook.RelativePath())
+	}
+
+	return
+}
+
 // TODO: Add assert on file system ( readable, permissions ...)
 func LoadFromPath(projectDirectory string) (project Project) {
 	project = Project{
 		Path:      &projectDirectory,
 		Playbooks: nil,
 	}
-	fmt.Println(projectDirectory)
 	playbooks, errPlaybooks := readPlaybook(projectDirectory)
 	inventories, errInventories := readInventories(projectDirectory)
 	project.Playbooks = playbooks
