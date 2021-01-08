@@ -14,7 +14,7 @@ type AnsibleCommandTpl struct {
 	Check             bool
 	Diff              bool
 	VaultPasswordFile string
-	AskVaultPassFile  bool
+	AskVaultPass      bool
 }
 
 var templateBash = `
