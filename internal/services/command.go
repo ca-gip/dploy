@@ -21,7 +21,7 @@ var templateBash = `
 # Dploy command result
 
 {{- range $inventory := .Inventory }}
-ansible-playbook -i {{ $inventory.RelativePath }} -p {{ $.Playbook.RelativePath }} 
+ansible-playbook -i {{ $inventory.RelativePath }} {{ $.Playbook.RelativePath }} 
 {{- if $.Tags}} -t {{ range $i,$tag := $.Tags }}{{if gt $i 0 }},{{end}}{{ $tag }}{{ end }}{{- end}}
 {{- if $.Limit}} -l {{ range $i,$limit := $.Limit }}{{if gt $i 0 }},{{end}}{{ $limit }}{{ end }}{{- end}}
 {{- if $.Check}} -c{{- end}}
