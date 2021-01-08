@@ -26,7 +26,7 @@ ansible-playbook -i {{ $inventory.RelativePath }} -p {{ $.Playbook.RelativePath 
 {{- if $.Limit}} -l {{ range $i,$limit := $.Limit }}{{if gt $i 0 }},{{end}}{{ $limit }}{{ end }}{{- end}}
 {{- if $.Check}} -c{{- end}}
 {{- if $.Diff}} --diff{{- end}}
-{{- if $.AskVaultPassFile}} --ask-vault-password{{- end}}
+{{- if $.AskVaultPass}} --ask-vault-password{{- end}}
 {{- if $.VaultPasswordFile}} --vault-password-file {{ $.VaultPasswordFile}}{{- end}}
 {{- end }}
 `
