@@ -125,6 +125,15 @@ func (project *Project) GetPlaybooks() (values []string) {
 	return
 }
 
+func (project *Project) GetPlaybook(path string) *Playbook {
+	for _, playbook := range project.Playbooks {
+		if path == playbook.RelativePath() {
+			return playbook
+		}
+	}
+	return nil
+}
+
 // TODO: Add assert on file system ( readable, permissions ...)
 func LoadFromPath(projectDirectory string) (project Project) {
 	project = Project{
