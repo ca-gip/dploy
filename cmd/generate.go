@@ -20,6 +20,7 @@ import (
 	"github.com/ca-gip/dploy/internal/services"
 	"github.com/spf13/cobra"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -68,10 +69,9 @@ func init() {
 	// is called directly, e.g.:
 	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	allowedOperators := []string{"==", "!=", "$=", "~=", "^="}
-
 	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		key, op, value := services.ParseFilter(toComplete)
+
 		cobra.CompDebug(toComplete, true)
 		cobra.CompDebug(fmt.Sprintf("key:%s op:%s value:%s", key, op, value), true)
 
@@ -191,4 +191,25 @@ func init() {
 		return k8s.GetPlaybooks(), cobra.ShellCompDirectiveDefault
 	})
 
+}
+
+var allowedOperators = []string{"==", "!=", "$=", "~=", "^="}
+var filtersRe = regexp.MustCompile("(\\w*)(==|!=|$=|~=|^=)(\\w*)")
+
+type Filter struct {
+	Key   string
+	Op    string
+	Value string
+}
+
+func parseFilterArgs(toComplete string) (filters []Filter) {
+	for _, filter := range filtersRe.FindAllStringSubmatch(toComplete, -1) {
+		filters = append(filters, Filter{
+			Key:   filter[1],
+			Op:    filter[2],
+			Value: filter[3],
+		})
+	}
+
+	return
 }
