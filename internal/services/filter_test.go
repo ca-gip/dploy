@@ -15,6 +15,10 @@ func TestParseFilterArgsFromString(t *testing.T) {
 			given:  "customer==cagip",
 			expect: []Filter{{Key: "customer", Op: Equal, Value: "cagip"}},
 		},
+		"customer!!cagip should nothing": {
+			given:  "customer!!cagip",
+			expect: nil,
+		},
 		"customer==cagip,platform==os should pass": {
 			given:  "customer==cagip,platform==os",
 			expect: []Filter{{Key: "customer", Op: Equal, Value: "cagip"}, {Key: "platform", Op: Equal, Value: "os"}},
