@@ -2,39 +2,12 @@ package services
 
 import (
 	"log"
-	"regexp"
-	"strings"
 )
 
 type Project struct {
 	Path        *string
 	Inventories []*Inventory
 	Playbooks   []*Playbook
-}
-
-var filterRegex = regexp.MustCompile("(\\w*)(\\W*)(\\w*)")
-
-func ParseFilter(filter string) (key, op, value string) {
-	result := filterRegex.FindStringSubmatch(filter)
-	return result[1], result[2], result[3]
-}
-
-func ConditionEval(left, right, op string) bool {
-	switch op {
-	case "==":
-		return strings.EqualFold(left, right)
-	case "!=":
-		return !strings.EqualFold(left, right)
-	case "$=":
-		return strings.HasSuffix(left, right)
-	case "~=":
-		return strings.Contains(left, right)
-	case "^=":
-		return strings.HasPrefix(left, right)
-	default:
-		log.Fatalf("Unsuported filter operation %s", op)
-		return false
-	}
 }
 
 func AllTrue(a map[string]bool) bool {
@@ -51,7 +24,7 @@ func AllTrue(a map[string]bool) bool {
 	return true
 }
 
-func (project *Project) FilterFromVars(filters []string) (filtered []*Inventory) {
+func (project *Project) FilterFromVars(filters []Filter) (filtered []*Inventory) {
 
 	if len(filters) == 0 {
 		return project.Inventories
@@ -64,12 +37,10 @@ func (project *Project) FilterFromVars(filters []string) (filtered []*Inventory)
 			matchFilter := make(map[condition]bool)
 
 			for _, filter := range filters {
-				key, op, value := ParseFilter(filter)
-				inventoryValue := inventory.Data.Groups["all"].Vars[key]
-				if ConditionEval(inventoryValue, value, op) {
-					matchFilter[filter] = true
+				if filter.Eval(inventory.Data.Groups["all"].Vars[filter.Key]) {
+					matchFilter[filter.GetRaw()] = true
 				} else {
-					matchFilter[filter] = false
+					matchFilter[filter.GetRaw()] = false
 				}
 			}
 
@@ -132,6 +103,10 @@ func (project *Project) GetPlaybook(path string) *Playbook {
 		}
 	}
 	return nil
+}
+
+func (project *Project) GetInventoryLength() int {
+	return len(project.Inventories)
 }
 
 // TODO: Add assert on file system ( readable, permissions ...)

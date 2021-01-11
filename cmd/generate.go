@@ -21,7 +21,6 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -35,10 +34,12 @@ TODO`,
 
 		curr, _ := os.Getwd()
 		k8s := services.LoadFromPath(curr)
-		filters, _ := cmd.Flags().GetStringSlice("filter")
+		rawFilters, _ := cmd.Flags().GetStringSlice("filter")
+		filters := services.ParseFilterArgsFromSlice(rawFilters)
 		inventories := k8s.FilterFromVars(filters)
 		playbookPath, _ := cmd.Flags().GetString("playbook")
 		playbook := k8s.GetPlaybook(playbookPath)
+
 		if playbook == nil {
 			log.Fatalf(`%s not a valid path`, playbookPath)
 		}
@@ -98,7 +99,6 @@ func init() {
 	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		key, op, value := services.ParseFilter(toComplete)
 
-		cobra.CompDebug(toComplete, true)
 		cobra.CompDebug(fmt.Sprintf("key:%s op:%s value:%s", key, op, value), true)
 
 		curr, _ := os.Getwd()
@@ -123,7 +123,7 @@ func init() {
 			if len(keysCompletion) == 1 {
 				var prefixedOperator []string
 
-				for _, allowedOperator := range allowedOperators {
+				for _, allowedOperator := range services.AllowedOperators {
 					prefixedOperator = append(prefixedOperator, fmt.Sprintf("%s%s", keysCompletion[0], allowedOperator))
 				}
 				return prefixedOperator, cobra.ShellCompDirectiveDefault
@@ -136,7 +136,7 @@ func init() {
 		if writingOp {
 			var prefixedOperator []string
 
-			for _, allowedOperator := range allowedOperators {
+			for _, allowedOperator := range services.AllowedOperators {
 
 				if op == allowedOperator {
 					availableValues := k8s.GetInventoryValues(key)
@@ -184,7 +184,7 @@ func init() {
 
 		writingValue := key != "" && op != "" && value != ""
 		if writingValue {
-			for _, allowedOperator := range allowedOperators {
+			for _, allowedOperator := range services.AllowedOperators {
 
 				if op == allowedOperator {
 					availableValues := k8s.GetInventoryValues(key)
@@ -217,25 +217,4 @@ func init() {
 		return k8s.GetPlaybooks(), cobra.ShellCompDirectiveDefault
 	})
 
-}
-
-var allowedOperators = []string{"==", "!=", "$=", "~=", "^="}
-var filtersRe = regexp.MustCompile("(\\w*)(==|!=|$=|~=|^=)(\\w*)")
-
-type Filter struct {
-	Key   string
-	Op    string
-	Value string
-}
-
-func parseFilterArgs(toComplete string) (filters []Filter) {
-	for _, filter := range filtersRe.FindAllStringSubmatch(toComplete, -1) {
-		filters = append(filters, Filter{
-			Key:   filter[1],
-			Op:    filter[2],
-			Value: filter[3],
-		})
-	}
-
-	return
 }
