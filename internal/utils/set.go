@@ -12,12 +12,21 @@ func NewSet() *set {
 	return s
 }
 
-func (s *set) Add(value string) {
+func (s *set) Add(value string) *set {
 	s.m[value] = exists
+	return s
 }
 
-func (s *set) Remove(value string) {
+func (s *set) Concat(values []string) *set {
+	for _, value := range values {
+		s.Add(value)
+	}
+	return s
+}
+
+func (s *set) Remove(value string) *set {
 	delete(s.m, value)
+	return s
 }
 
 func (s *set) List() (list []string) {
