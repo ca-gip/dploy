@@ -27,7 +27,7 @@ import (
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
-	Short: "Generate ansible-playbook command for multiple inventories",
+	Short: "Generate ansible-playbook command",
 	Long: `
 TODO`,
 	Run: func(cmd *cobra.Command, args []string) {
