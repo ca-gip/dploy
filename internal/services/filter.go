@@ -10,15 +10,16 @@ import (
 const (
 	Equal     = "=="
 	NotEqual  = "!="
-	StartWith = "$="
+	EndWith   = "$="
 	Contains  = "~="
-	EndWith   = "^="
+	StartWith = "^="
 )
 
 var (
-	AllowedOperators = []string{Equal, NotEqual, StartWith, Contains, EndWith}
-	FiltersRe        = regexp.MustCompile("(\\w*)(==|!=|$=|~=|^=)(\\w*)")
-	FilterRegex      = regexp.MustCompile("(\\w*)(\\W*)(\\w*)")
+	AllowedOperators   = []string{Equal, NotEqual, StartWith, Contains, EndWith}
+	FiltersRe          = regexp.MustCompile("(\\w*)(==|!=|$=|~=|^=)(\\w*)")
+	FilterRegex        = regexp.MustCompile("(\\w*)(\\W*)(\\w*)")
+	FilterCompletionRe = regexp.MustCompile("(\\w*)(==|!=|$=|~=|^=)(\\w*)([,]|)")
 )
 
 type Filter struct {
@@ -26,6 +27,8 @@ type Filter struct {
 	Op    string
 	Value string
 }
+
+type Filters []Filter
 
 func ParseFilter(filter string) (key, op, value string) {
 	result := FilterRegex.FindStringSubmatch(filter)
@@ -62,15 +65,15 @@ func (f Filter) GetRaw() string {
 
 func (f Filter) Eval(against string) bool {
 	switch f.Op {
-	case "==":
+	case Equal:
 		return strings.EqualFold(f.Value, against)
-	case "!=":
+	case NotEqual:
 		return !strings.EqualFold(f.Value, against)
-	case "$=":
+	case EndWith:
 		return strings.HasSuffix(f.Value, against)
-	case "~=":
+	case Contains:
 		return strings.Contains(f.Value, against)
-	case "^=":
+	case StartWith:
 		return strings.HasPrefix(f.Value, against)
 	default:
 		log.Fatalf("Unsuported filter operation %s", f.Op)
