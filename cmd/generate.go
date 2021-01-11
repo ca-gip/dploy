@@ -33,12 +33,14 @@ TODO`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		curr, _ := os.Getwd()
-		k8s := services.LoadFromPath(curr)
+		project := services.LoadFromPath(curr)
+
 		rawFilters, _ := cmd.Flags().GetStringSlice("filter")
 		filters := services.ParseFilterArgsFromSlice(rawFilters)
-		inventories := k8s.FilterFromVars(filters)
+		inventories := project.Inventories.Filter(filters)
+
 		playbookPath, _ := cmd.Flags().GetString("playbook")
-		playbook := k8s.GetPlaybook(playbookPath)
+		playbook := project.Playbooks.GetPlaybook(playbookPath)
 
 		if playbook == nil {
 			log.Fatalf(`%s not a valid path`, playbookPath)
@@ -104,7 +106,7 @@ func init() {
 		curr, _ := os.Getwd()
 		k8s := services.LoadFromPath(curr)
 
-		availableKeys := k8s.GetInventoryKeys()
+		availableKeys := k8s.Inventories.GetInventoryKeys()
 
 		blank := key == "" && op == "" && value == ""
 		if blank {
@@ -139,7 +141,7 @@ func init() {
 			for _, allowedOperator := range services.AllowedOperators {
 
 				if op == allowedOperator {
-					availableValues := k8s.GetInventoryValues(key)
+					availableValues := k8s.Inventories.GetInventoryValues(key)
 
 					var prefixedValues []string
 
@@ -162,7 +164,7 @@ func init() {
 			}
 
 			if len(prefixedOperator) == 1 {
-				availableValues := k8s.GetInventoryValues(key)
+				availableValues := k8s.Inventories.GetInventoryValues(key)
 
 				_, foundOp, _ := services.ParseFilter(prefixedOperator[0])
 
@@ -187,7 +189,7 @@ func init() {
 			for _, allowedOperator := range services.AllowedOperators {
 
 				if op == allowedOperator {
-					availableValues := k8s.GetInventoryValues(key)
+					availableValues := k8s.Inventories.GetInventoryValues(key)
 
 					var prefixedValues []string
 
@@ -207,14 +209,14 @@ func init() {
 
 		}
 
-		return k8s.GetInventoryKeys(), cobra.ShellCompDirectiveDefault
+		return k8s.Inventories.GetInventoryKeys(), cobra.ShellCompDirectiveDefault
 
 	})
 
 	_ = generateCmd.RegisterFlagCompletionFunc("playbook", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		curr, _ := os.Getwd()
 		k8s := services.LoadFromPath(curr)
-		return k8s.GetPlaybooks(), cobra.ShellCompDirectiveDefault
+		return k8s.Playbooks.GetPlaybooks(), cobra.ShellCompDirectiveDefault
 	})
 
 }
