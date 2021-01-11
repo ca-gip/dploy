@@ -17,9 +17,7 @@ type AnsibleCommandTpl struct {
 	AskVaultPass      bool
 }
 
-var templateBash = `
-# Dploy command result
-
+var templateBash = `# Dploy commands :
 {{- range $inventory := .Inventory }}
 ansible-playbook -i {{ $inventory.RelativePath }} {{ $.Playbook.RelativePath }} 
 {{- if $.Tags}} -t {{ range $i,$tag := $.Tags }}{{if gt $i 0 }},{{end}}{{ $tag }}{{ end }}{{- end}}
