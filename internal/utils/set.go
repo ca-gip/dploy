@@ -2,41 +2,41 @@ package utils
 
 var exists = struct{}{}
 
-type set struct {
+type Set struct {
 	m map[string]struct{}
 }
 
-func NewSet() *set {
-	s := &set{}
+func NewSet() *Set {
+	s := &Set{}
 	s.m = make(map[string]struct{})
 	return s
 }
 
-func (s *set) Add(value string) *set {
+func (s *Set) Add(value string) *Set {
 	s.m[value] = exists
 	return s
 }
 
-func (s *set) Concat(values []string) *set {
+func (s *Set) Concat(values []string) *Set {
 	for _, value := range values {
 		s.Add(value)
 	}
 	return s
 }
 
-func (s *set) Remove(value string) *set {
+func (s *Set) Remove(value string) *Set {
 	delete(s.m, value)
 	return s
 }
 
-func (s *set) List() (list []string) {
+func (s *Set) List() (list []string) {
 	for key, _ := range s.m {
 		list = append(list, key)
 	}
 	return
 }
 
-func (s *set) Contains(value string) bool {
+func (s *Set) Contains(value string) bool {
 	_, c := s.m[value]
 	return c
 }

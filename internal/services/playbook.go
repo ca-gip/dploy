@@ -2,28 +2,23 @@ package services
 
 import (
 	"fmt"
+	"github.com/ca-gip/dploy/internal/utils"
+	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 )
 
-type Role struct {
-	Role string      `yaml:"role"`
-	Tags interface{} `yaml:"tags,omitempty" yaml:"tags,omitempty"`
-}
-
-type Play struct {
-	Hosts string      `yaml:"hosts"`
-	Roles []Role      `yaml:"roles"`
-	Tags  interface{} `yaml:"tags,omitempty"`
+type Tasks struct {
+	Tags []string `yaml:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 type Playbook struct {
 	AbsolutePath string
 	RootPath     *string
 	Plays        []Play
+	AllTags      utils.Set
 }
 
 func (playbook *Playbook) RelativePath() string {
@@ -39,6 +34,9 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 		fmt.Println(err)
 		return
 	}
+
+	// Merge Play, Role and Task Tags for a playbook
+	allTags := utils.NewSet()
 
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
@@ -62,18 +60,32 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 				// TODO add debug for unmarshaling
 				return nil
 			}
-
 			if plays == nil || len(plays) == 0 {
 				// TODO Log debug no play found
 				return nil
 			}
-
 			if plays[0].Hosts == "" {
 				// TODO Log debug do not seems to be a playbook
 				return nil
 			}
 
-			result = append(result, &Playbook{RootPath: &rootPath, AbsolutePath: osPathname, Plays: plays})
+			// Browse Role Tags
+			for _, play := range plays {
+				allTags.Concat(play.Tags)
+				for _, role := range play.Roles {
+					role.ReadRole(rootPath)
+					allTags.Concat(role.Tags)
+				}
+			}
+
+			playbook := Playbook{
+				RootPath:     &rootPath,
+				AbsolutePath: osPathname,
+				Plays:        plays,
+				AllTags:      *allTags,
+			}
+			result = append(result, &playbook)
+			fmt.Printf("Struct: %v", playbook.AllTags)
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
@@ -81,5 +93,6 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 		},
 		Unsorted: true,
 	})
+
 	return
 }
