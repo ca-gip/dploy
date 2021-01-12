@@ -11,11 +11,23 @@ func TestParseFilterArgsFromString(t *testing.T) {
 		given  string
 		expect []Filter
 	}{
-		"customer==cagip should pass": {
-			given:  "customer==cagip",
-			expect: []Filter{{Key: "customer", Op: Equal, Value: "cagip"}},
+		"equal should pass": {
+			given:  "key==value",
+			expect: []Filter{{Key: "key", Op: Equal, Value: "value"}},
 		},
-		"customer!!cagip should nothing": {
+		"equal , with key/value containing dash should pass": {
+			given:  "ke_y==val_ue",
+			expect: []Filter{{Key: "ke_y", Op: Equal, Value: "val_ue"}},
+		},
+		"equal with ending should pass": {
+			given:  "key==value,",
+			expect: []Filter{{Key: "key", Op: Equal, Value: "value"}},
+		},
+		"two equal should pass": {
+			given:  "key==value,key2==value2",
+			expect: []Filter{{Key: "key", Op: Equal, Value: "value"}, {Key: "key2", Op: Equal, Value: "value2"}},
+		},
+		"op !! should nothing": {
 			given:  "customer!!cagip",
 			expect: nil,
 		},

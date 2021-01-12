@@ -49,7 +49,6 @@ func ParseFilterArgsFromSlice(rawFilters []string) (filters []Filter) {
 
 func ParseFilterArgsFromString(raw string) (filters []Filter) {
 	for _, filter := range FiltersRe.FindAllStringSubmatch(raw, -1) {
-		fmt.Println(filter)
 		filters = append(filters, Filter{
 			Key:   filter[1],
 			Op:    filter[2],
