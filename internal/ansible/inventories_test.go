@@ -193,6 +193,70 @@ func TestFilter(t *testing.T) {
 			filters: Filters{{Key: "key", Op: NotEqual, Value: "value"}},
 			expect:  1,
 		},
+		"key==value,foo==bar,bar==foo should return two inventory": {
+			inventories: Inventories{
+				{Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "oof"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "rab", "bar": "oof"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "rab", "bar": "foo"}}},
+				}}},
+			filters: Filters{{Key: "key", Op: Equal, Value: "value"}, {Key: "foo", Op: Equal, Value: "bar"}, {Key: "bar", Op: Equal, Value: "foo"}},
+			expect:  2,
+		},
+		"key==value,foo==bar,bar!=foo should return two inventory": {
+			inventories: Inventories{
+				{Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "oof"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "rab", "bar": "oof"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "rab", "bar": "foo"}}},
+				}}},
+			filters: Filters{{Key: "key", Op: Equal, Value: "value"}, {Key: "foo", Op: Equal, Value: "bar"}, {Key: "bar", Op: NotEqual, Value: "foo"}},
+			expect:  1,
+		},
+		"key==value,foo==bar,bar==oof should return one inventory": {
+			inventories: Inventories{
+				{Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "oof"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "rab", "bar": "oof"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "rab", "bar": "foo"}}},
+				}}},
+			filters: Filters{{Key: "key", Op: Equal, Value: "value"}, {Key: "foo", Op: Equal, Value: "bar"}, {Key: "bar", Op: Equal, Value: "oof"}},
+			expect:  1,
+		},
+		"key==value,foo!=bar,bar==oof should return one inventory": {
+			inventories: Inventories{
+				{Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "oof"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "rab", "bar": "oof"}}},
+				}}, {Data: &aini.InventoryData{
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "rab", "bar": "foo"}}},
+				}}},
+			filters: Filters{{Key: "key", Op: Equal, Value: "value"}, {Key: "foo", Op: NotEqual, Value: "bar"}, {Key: "bar", Op: Equal, Value: "oof"}},
+			expect:  1,
+		},
 	}
 
 	for testName, testCase := range TestCases {
