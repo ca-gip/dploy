@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ca-gip/dploy/internal/services"
+	"github.com/ca-gip/dploy/internal/ansible"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -33,10 +33,10 @@ TODO`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		curr, _ := os.Getwd()
-		project := services.LoadFromPath(curr)
+		project := ansible.LoadFromPath(curr)
 
 		rawFilters, _ := cmd.Flags().GetStringSlice("filter")
-		filters := services.ParseFilterArgsFromSlice(rawFilters)
+		filters := ansible.ParseFilterArgsFromSlice(rawFilters)
 		inventories := project.Inventories.Filter(filters)
 
 		playbookPath, _ := cmd.Flags().GetString("playbook")
@@ -54,7 +54,7 @@ TODO`,
 		vaultPassFile, _ := cmd.Flags().GetString("vault-password-file")
 		askVaultPass, _ := cmd.Flags().GetBool("ask-vault-password")
 
-		commands := &services.AnsibleCommandTpl{
+		commands := &ansible.AnsibleCommandTpl{
 			Inventory:         inventories,
 			Playbook:          playbook,
 			Tags:              tags,
@@ -99,12 +99,12 @@ func init() {
 	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		key, op, value := services.ParseFilter(toComplete)
+		key, op, value := ansible.ParseFilter(toComplete)
 
 		cobra.CompDebug(fmt.Sprintf("key:%s op:%s value:%s", key, op, value), true)
 
 		curr, _ := os.Getwd()
-		k8s := services.LoadFromPath(curr)
+		k8s := ansible.LoadFromPath(curr)
 
 		availableKeys := k8s.Inventories.GetInventoryKeys()
 
@@ -125,7 +125,7 @@ func init() {
 			if len(keysCompletion) == 1 {
 				var prefixedOperator []string
 
-				for _, allowedOperator := range services.AllowedOperators {
+				for _, allowedOperator := range ansible.AllowedOperators {
 					prefixedOperator = append(prefixedOperator, fmt.Sprintf("%s%s", keysCompletion[0], allowedOperator))
 				}
 				return prefixedOperator, cobra.ShellCompDirectiveDefault
@@ -138,7 +138,7 @@ func init() {
 		if writingOp {
 			var prefixedOperator []string
 
-			for _, allowedOperator := range services.AllowedOperators {
+			for _, allowedOperator := range ansible.AllowedOperators {
 
 				if op == allowedOperator {
 					availableValues := k8s.Inventories.GetInventoryValues(key)
@@ -166,7 +166,7 @@ func init() {
 			if len(prefixedOperator) == 1 {
 				availableValues := k8s.Inventories.GetInventoryValues(key)
 
-				_, foundOp, _ := services.ParseFilter(prefixedOperator[0])
+				_, foundOp, _ := ansible.ParseFilter(prefixedOperator[0])
 
 				var prefixedValues []string
 
@@ -186,7 +186,7 @@ func init() {
 
 		writingValue := key != "" && op != "" && value != ""
 		if writingValue {
-			for _, allowedOperator := range services.AllowedOperators {
+			for _, allowedOperator := range ansible.AllowedOperators {
 
 				if op == allowedOperator {
 					availableValues := k8s.Inventories.GetInventoryValues(key)
@@ -215,7 +215,7 @@ func init() {
 
 	_ = generateCmd.RegisterFlagCompletionFunc("playbook", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		curr, _ := os.Getwd()
-		k8s := services.LoadFromPath(curr)
+		k8s := ansible.LoadFromPath(curr)
 		return k8s.Playbooks.GetPlaybooks(), cobra.ShellCompDirectiveDefault
 	})
 

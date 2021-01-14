@@ -1,4 +1,4 @@
-package services
+package ansible
 
 type Task struct {
 	Role string   `yaml:"role"`

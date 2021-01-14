@@ -1,4 +1,4 @@
-package services
+package ansible
 
 import (
 	"github.com/go-test/deep"

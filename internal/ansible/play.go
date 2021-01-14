@@ -1,4 +1,4 @@
-package services
+package ansible
 
 type Play struct {
 	Hosts string   `yaml:"hosts"`

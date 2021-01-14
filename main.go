@@ -2,13 +2,14 @@ package main
 
 import (
 	"github.com/ca-gip/dploy/cmd"
+	"github.com/ca-gip/dploy/internal/execution"
 )
 
 func main() {
 
 	//home, _ := os.UserHomeDir()
 	//path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube")
-	//k8s := services.LoadFromPath(path)
+	//k8s := ansible.LoadFromPath(path)
 	//
 	//filter := []string{"customer!=cacf_corp_hors_prod"}
 	//filteredInventories := k8s.FilterFromVars(filter)
@@ -19,7 +20,7 @@ func main() {
 	//
 	//fmt.Println("Playbooks")
 	//
-	//tpl := services.AnsibleCommandTpl{
+	//tpl := ansible.AnsibleCommandTpl{
 	//	Inventory:         filteredInventories,
 	//	Playbook:          k8s.Playbooks[1],
 	//	Tags:              []string{"tag1", "tag2"},
@@ -31,6 +32,7 @@ func main() {
 	//	AskVaultPass:  false,
 	//}
 	//tpl.GenerateCmd()
+	execution.Test()
 
 	cmd.Execute()
 }

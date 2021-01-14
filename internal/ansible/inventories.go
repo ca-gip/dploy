@@ -1,4 +1,4 @@
-package services
+package ansible
 
 import "github.com/ca-gip/dploy/internal/utils"
 

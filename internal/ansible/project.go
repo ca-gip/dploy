@@ -1,4 +1,4 @@
-package services
+package ansible
 
 import (
 	"log"
