@@ -1,11 +1,11 @@
 package ansible
 
 import (
-	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
 	"io/ioutil"
+	"k8s.io/klog/v2"
 	"path/filepath"
 	"strings"
 )
@@ -24,7 +24,7 @@ func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 	absRoot, err := filepath.Abs(rootPath + "/roles/" + role.Name)
 
 	if err != nil {
-		// TODO log erreor reading role
+		klog.Error("The role ", role.Name, "can't be read. Error:", err.Error())
 		return
 	}
 
@@ -39,8 +39,7 @@ func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 
 			binData, err := ioutil.ReadFile(osPathname)
 			if err != nil {
-				// TODO log fatal, unable to read file
-				fmt.Println(err)
+				klog.Error("Cannot read file: ", osPathname, ". Error:", err.Error())
 			}
 
 			var tasks []Task
@@ -51,7 +50,7 @@ func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 
 			tasks = append(tasks, Task{Tags: tags.List()})
 			if len(tags.List()) > 0 {
-				fmt.Println("Task tags:", tags.List())
+				klog.V(8).Info("Task tags:", tags.List())
 			}
 			return nil
 		},

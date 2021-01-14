@@ -6,6 +6,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
 	"io/ioutil"
+	"k8s.io/klog/v2"
 	"path/filepath"
 	"strings"
 )
@@ -52,20 +53,20 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 			var plays []Play
 			binData, err := ioutil.ReadFile(osPathname)
 			if err != nil {
-				// TODO add debug for read
+				klog.Error("Cannot read playbook", osPathname, ". Error: ", err.Error())
 				return nil
 			}
 			err = yaml.Unmarshal([]byte(binData), &plays)
 			if err != nil {
-				// TODO add debug for unmarshaling
+				klog.Error("Cannot unmashal playbook data", osPathname, ". Error: ", err.Error())
 				return nil
 			}
 			if plays == nil || len(plays) == 0 {
-				// TODO Log debug no play found
+				klog.V(8).Info("No play found inside the playbook: ", osPathname)
 				return nil
 			}
-			if plays[0].Hosts == "" {
-				// TODO Log debug do not seems to be a playbook
+			if plays[0].Hosts == utils.EmptyString {
+				klog.V(8).Info("No play found inside the playbook: ", osPathname)
 				return nil
 			}
 
@@ -85,7 +86,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 				AllTags:      *allTags,
 			}
 			result = append(result, &playbook)
-			fmt.Printf("Struct: %v", playbook.AllTags)
+			klog.V(8).Info("Available tags are :", playbook.AllTags)
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
