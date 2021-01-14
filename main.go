@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/ca-gip/dploy/cmd"
-	"github.com/ca-gip/dploy/internal/execution"
 )
 
 func main() {
@@ -26,7 +25,6 @@ func main() {
 	//	AskVaultPass:  false,
 	//}
 	//tpl.GenerateCmd()
-	execution.Test()
 
 	cmd.Execute()
 }
