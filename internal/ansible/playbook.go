@@ -3,16 +3,16 @@ package ansible
 import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
-	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
-	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"k8s.io/klog/v2"
 	"path/filepath"
 	"strings"
 )
 
 type Tasks struct {
-	Tags []string `yaml:"tags,omitempty" yaml:"tags,omitempty"`
+	Tags interface{} `yaml:"tags,omitempty"`
 }
 
 type Playbook struct {
@@ -41,7 +41,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
-			if strings.Contains(osPathname, "vars") || strings.Contains(osPathname, "template") {
+			if strings.Contains(de.Name(), "vars") || de.Name() == "template" || de.Name() == "roles" {
 				return godirwalk.SkipThis
 			}
 
@@ -53,29 +53,31 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 			var plays []Play
 			binData, err := ioutil.ReadFile(osPathname)
 			if err != nil {
-				log.Error("Cannot read playbook", osPathname, ". Error: ", err.Error())
+				klog.Error("Cannot read playbook", osPathname, ". Error: ", err.Error())
 				return nil
 			}
 			err = yaml.Unmarshal([]byte(binData), &plays)
 			if err != nil {
-				log.Error("Cannot unmashal playbook data", osPathname, ". Error: ", err.Error())
+				klog.Error("Skip", osPathname, " not an inventory ")
 				return nil
 			}
 			if plays == nil || len(plays) == 0 {
-				log.Debug("No play found inside the playbook: ", osPathname)
+				klog.Info("No play found inside the playbook: ", osPathname)
 				return nil
 			}
 			if plays[0].Hosts == utils.EmptyString {
-				log.Debug("No play found inside the playbook: ", osPathname)
+				klog.V(8).Info("No play found inside the playbook: ", osPathname)
 				return nil
 			}
 
 			// Browse Role Tags
 			for _, play := range plays {
-				allTags.Concat(play.Tags)
+
+				allTags.Concat(play.Tags())
+				fmt.Println("Play tags are: ", play.Tags())
 				for _, role := range play.Roles {
 					role.ReadRole(rootPath)
-					allTags.Concat(role.Tags)
+					allTags.Concat(role.Tags())
 				}
 			}
 
@@ -86,7 +88,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 				AllTags:      *allTags,
 			}
 			result = append(result, &playbook)
-			log.Debug("Available tags are :", playbook.AllTags)
+			klog.V(8).Info("Available tags are :", playbook.AllTags)
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
