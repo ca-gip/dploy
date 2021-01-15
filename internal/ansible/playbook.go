@@ -3,8 +3,8 @@ package ansible
 import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
-	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
+	"gopkg.in/yaml.v2"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"path/filepath"
@@ -12,7 +12,7 @@ import (
 )
 
 type Tasks struct {
-	Tags []string `yaml:"tags,omitempty" yaml:"tags,omitempty"`
+	Tags interface{} `yaml:"tags,omitempty"`
 }
 
 type Playbook struct {
@@ -41,7 +41,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
-			if strings.Contains(osPathname, "vars") || strings.Contains(osPathname, "template") {
+			if strings.Contains(de.Name(), "vars") || de.Name() == "template" || de.Name() == "roles" {
 				return godirwalk.SkipThis
 			}
 
@@ -58,7 +58,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 			}
 			err = yaml.Unmarshal([]byte(binData), &plays)
 			if err != nil {
-				log.Error("Cannot unmashal playbook data", osPathname, ". Error: ", err.Error())
+				log.Error("Skip", osPathname, " not an inventory ")
 				return nil
 			}
 			if plays == nil || len(plays) == 0 {
@@ -72,10 +72,12 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 
 			// Browse Role Tags
 			for _, play := range plays {
-				allTags.Concat(play.Tags)
+
+				allTags.Concat(play.Tags())
+				fmt.Println("Play tags are: ", play.Tags())
 				for _, role := range play.Roles {
 					role.ReadRole(rootPath)
-					allTags.Concat(role.Tags)
+					allTags.Concat(role.Tags())
 				}
 			}
 
