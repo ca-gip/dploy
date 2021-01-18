@@ -2,6 +2,7 @@ package ansible
 
 import (
 	"github.com/go-test/deep"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -46,4 +47,111 @@ func TestParseFilterArgsFromString(t *testing.T) {
 		})
 	}
 
+}
+
+func TestEval(t *testing.T) {
+
+	TestCases := map[string]struct {
+		given   Filter
+		against string
+		expect  bool
+	}{
+		"foo equal foo should pass": {
+			given: Filter{
+				Key:   "",
+				Op:    Equal,
+				Value: "foo",
+			},
+			against: "foo",
+			expect:  true,
+		},
+		"foo equal bar should fail": {
+			given: Filter{
+				Key:   "",
+				Op:    Equal,
+				Value: "foo",
+			},
+			against: "bar",
+			expect:  false,
+		},
+		"foo notequal bar should pass": {
+			given: Filter{
+				Key:   "",
+				Op:    NotEqual,
+				Value: "foo",
+			},
+			against: "bar",
+			expect:  true,
+		},
+		"foo notequal foo should fail": {
+			given: Filter{
+				Key:   "",
+				Op:    NotEqual,
+				Value: "foo",
+			},
+			against: "foo",
+			expect:  false,
+		},
+		"foo endwith oo should pass": {
+			given: Filter{
+				Key:   "",
+				Op:    EndWith,
+				Value: "foo",
+			},
+			against: "oo",
+			expect:  true,
+		},
+		"foo endwith fo should fail": {
+			given: Filter{
+				Key:   "",
+				Op:    EndWith,
+				Value: "foo",
+			},
+			against: "fo",
+			expect:  false,
+		},
+		"foo contains o should pass": {
+			given: Filter{
+				Key:   "",
+				Op:    Contains,
+				Value: "foo",
+			},
+			against: "o",
+			expect:  true,
+		},
+		"foo contains z should fail": {
+			given: Filter{
+				Key:   "",
+				Op:    Contains,
+				Value: "foo",
+			},
+			against: "z",
+			expect:  false,
+		},
+		"foo StartWith fo should pass": {
+			given: Filter{
+				Key:   "",
+				Op:    StartWith,
+				Value: "foo",
+			},
+			against: "fo",
+			expect:  true,
+		},
+		"foo StartWith oo should fail": {
+			given: Filter{
+				Key:   "",
+				Op:    StartWith,
+				Value: "foo",
+			},
+			against: "oo",
+			expect:  false,
+		},
+	}
+
+	for testName, testCase := range TestCases {
+		t.Run(testName, func(t *testing.T) {
+			result := testCase.given.Eval(testCase.against)
+			assert.Equal(t, testCase.expect, result)
+		})
+	}
 }
