@@ -1,7 +1,7 @@
 package ansible
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 type Project struct {
@@ -12,6 +12,9 @@ type Project struct {
 
 // TODO: Add assert on file system ( readable, permissions ...)
 func LoadFromPath(projectDirectory string) (project Project) {
+
+	log.Info("info")
+	log.Debug("debug")
 	project = Project{
 		Path:      &projectDirectory,
 		Playbooks: nil,

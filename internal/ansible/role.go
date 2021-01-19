@@ -4,8 +4,8 @@ import (
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"k8s.io/klog/v2"
 	"path/filepath"
 	"strings"
 )
@@ -24,7 +24,7 @@ func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 	absRoot, err := filepath.Abs(rootPath + "/roles/" + role.Name)
 
 	if err != nil {
-		klog.Error("The role ", role.Name, "can't be read. Error:", err.Error())
+		log.Error("The role ", role.Name, "can't be read. Error:", err.Error())
 		return
 	}
 
@@ -39,7 +39,7 @@ func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 
 			binData, err := ioutil.ReadFile(osPathname)
 			if err != nil {
-				klog.Error("Cannot read file: ", osPathname, ". Error:", err.Error())
+				log.Error("Cannot read file: ", osPathname, ". Error:", err.Error())
 			}
 
 			var tasks []Task
@@ -50,7 +50,7 @@ func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 
 			tasks = append(tasks, Task{Tags: tags.List()})
 			if len(tags.List()) > 0 {
-				klog.V(8).Info("Task tags:", tags.List())
+				log.Info("Task tags:", tags.List())
 			}
 			return nil
 		},
