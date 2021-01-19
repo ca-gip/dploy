@@ -21,6 +21,7 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -217,6 +218,23 @@ func init() {
 		curr, _ := os.Getwd()
 		k8s := ansible.LoadFromPath(curr)
 		return k8s.Playbooks.GetPlaybooks(), cobra.ShellCompDirectiveDefault
+	})
+
+	_ = generateCmd.RegisterFlagCompletionFunc("tags", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+
+		var _ = regexp.MustCompile("([\\w-.\\/]+)([,]|)")
+
+		playbookPath, _ := cmd.Flags().GetString("playbook")
+		if len(playbookPath) == 0 {
+			return nil, cobra.ShellCompDirectiveDefault
+		}
+
+		curr, _ := os.Getwd()
+		project := ansible.LoadFromPath(curr)
+		playbook := project.Playbooks.GetPlaybook(playbookPath)
+
+		return playbook.AllTags.List(), cobra.ShellCompDirectiveDefault
+
 	})
 
 }
