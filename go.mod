@@ -14,6 +14,5 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
-	gopkg.in/yaml.v2 v2.2.8 // indirect
 	k8s.io/klog/v2 v2.4.0
 )
