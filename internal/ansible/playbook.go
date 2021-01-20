@@ -3,8 +3,8 @@ package ansible
 import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
+	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"k8s.io/klog/v2"
 	"path/filepath"
@@ -24,6 +24,29 @@ type Playbook struct {
 
 func (playbook *Playbook) RelativePath() string {
 	return strings.TrimPrefix(playbook.AbsolutePath, *playbook.RootPath+"/")
+}
+
+func ReadFromFile(osPathname string) (plays []Play) {
+	// Try to check playbook content
+	binData, err := ioutil.ReadFile(osPathname)
+	if err != nil {
+		klog.Error("Cannot read playbook", osPathname, ". Error: ", err.Error())
+		return
+	}
+	err = yaml.Unmarshal([]byte(binData), plays)
+	if err != nil {
+		klog.Error("Skip", osPathname, " not an inventory ")
+		return
+	}
+	if plays == nil || len(plays) == 0 {
+		klog.Info("No play found inside the playbook: ", osPathname)
+		return
+	}
+	if (plays[0]).Hosts == utils.EmptyString {
+		klog.V(8).Info("No play found inside the playbook: ", osPathname)
+		return
+	}
+	return
 }
 
 // Gather playbook files from a Parent directory
@@ -50,25 +73,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 			}
 
 			// Try to check playbook content
-			var plays []Play
-			binData, err := ioutil.ReadFile(osPathname)
-			if err != nil {
-				klog.Error("Cannot read playbook", osPathname, ". Error: ", err.Error())
-				return nil
-			}
-			err = yaml.Unmarshal([]byte(binData), &plays)
-			if err != nil {
-				klog.Error("Skip", osPathname, " not an inventory ")
-				return nil
-			}
-			if plays == nil || len(plays) == 0 {
-				klog.Info("No play found inside the playbook: ", osPathname)
-				return nil
-			}
-			if plays[0].Hosts == utils.EmptyString {
-				klog.V(8).Info("No play found inside the playbook: ", osPathname)
-				return nil
-			}
+			plays := ReadFromFile(osPathname)
 
 			// Browse Role Tags
 			for _, play := range plays {
@@ -77,6 +82,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 				fmt.Println("Play tags are: ", play.Tags())
 				for _, role := range play.Roles {
 					role.ReadRole(rootPath)
+					klog.Info("  Role info", role.Tags())
 					allTags.Concat(role.Tags())
 				}
 			}
