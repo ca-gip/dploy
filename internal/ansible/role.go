@@ -1,10 +1,9 @@
 package ansible
 
 import (
-	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
+	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"k8s.io/klog/v2"
 	"path/filepath"
@@ -13,9 +12,9 @@ import (
 
 type Role struct {
 	AbsolutePath string
-	Name         string `yaml:"role"`
+	Name         string      `json:"name" yaml:"role,flow"`
+	rawTags      interface{} `json:"tags" yaml:"tags,flow"`
 	Tasks        []Tasks
-	rawTags      interface{} `yaml:"tags,omitempty"`
 }
 
 func (role *Role) Tags() []string {
@@ -50,9 +49,10 @@ func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 			var tasks []Task
 			err = yaml.Unmarshal([]byte(binData), &tasks)
 			for _, task := range tasks {
-				fmt.Println("task t:", task.Tags())
 				tags.Concat(task.Tags())
 			}
+
+			klog.Info("tags in role tags:", role.rawTags)
 
 			tasks = append(tasks, Task{rawTags: tags.List()})
 			if len(tags.List()) > 0 {

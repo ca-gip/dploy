@@ -5,9 +5,9 @@ import (
 )
 
 type Play struct {
-	Hosts   string      `yaml:"hosts"`
-	Roles   []Role      `yaml:"roles"`
-	RawTags interface{} `yaml:"tags,omitempty"`
+	Hosts   string      `json:"hosts" yaml:"hosts"`
+	Roles   []Role      `yaml:"roles,omitempty"`
+	RawTags interface{} `json:"tags,inline" yaml:"tags,inline"`
 }
 
 func (play *Play) Tags() []string {
