@@ -1,9 +1,9 @@
 package ansible
 
 import (
-	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/karrick/godirwalk"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
@@ -22,7 +22,7 @@ func (role *Role) AllTags() (tags *utils.Set) {
 	for _, task := range role.Tasks {
 		tags.Concat(task.Tags.List())
 	}
-	fmt.Println("tags:::", tags.List())
+	log.Debug("tags:::", tags.List())
 	tags.Concat(role.Tags.List())
 	return
 }
@@ -32,14 +32,13 @@ func (role *Role) AllTags() (tags *utils.Set) {
 // All sub parent directory added like label in the inventory
 func (role *Role) ReadRoleTasks(rootPath string, pathTags ...string) (err error) {
 	absRoot, err := filepath.Abs(rootPath + "/roles/" + role.Name)
-	fmt.Println("reading ", role.Name, "at: ", absRoot)
+	log.Debug("reading ", role.Name, "at: ", absRoot)
 
 	if err != nil {
-		fmt.Println("The role ", role.Name, "can't be read. Error:", err.Error())
+		log.Debug("The role ", role.Name, "can't be read. Error:", err.Error())
 		return
 	}
 
-	fmt.Println(role.Name)
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
 
@@ -49,28 +48,28 @@ func (role *Role) ReadRoleTasks(rootPath string, pathTags ...string) (err error)
 
 			binData, err := ioutil.ReadFile(osPathname)
 			if err != nil {
-				fmt.Println("Cannot read file: ", osPathname, ". Error:", err.Error())
+				log.Debug("Cannot read file: ", osPathname, ". Error:", err.Error())
 			}
 
 			var tasks []Task
 			err = yaml.Unmarshal([]byte(binData), &tasks)
 
 			if err != nil {
-				fmt.Println("error readin role", osPathname, "err:", err.Error())
+				log.Debug("Error reading role", osPathname, "err:", err.Error())
 			} else {
-				fmt.Println("task is", tasks)
+				log.Debug("task is", tasks)
 			}
 
 			for _, task := range tasks {
 				role.Tasks = append(role.Tasks, task)
 			}
 
-			fmt.Println(osPathname, "tags in role tags:", role.AllTags())
+			log.Debug(osPathname, "tags in role tags:", role.AllTags())
 
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
-			fmt.Println(err.Error())
+			log.Error(err)
 			return godirwalk.SkipNode
 		},
 		Unsorted: true,

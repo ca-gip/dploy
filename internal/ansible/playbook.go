@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/karrick/godirwalk"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
@@ -39,20 +40,20 @@ func ReadFromFile(osPathname string) (playbook Playbook) {
 	content := fmt.Sprintf("plays:\n%s", string(binData))
 
 	if err != nil {
-		fmt.Println("Cannot read playbook", osPathname, ". Error: ", err.Error())
+		log.Error("Cannot read playbook", osPathname, ". Error: ", err.Error())
 		return
 	}
 	err = yaml.Unmarshal([]byte(content), &playbook)
 	if err != nil {
-		fmt.Println("Skip", osPathname, " not a playbook ", err.Error())
+		log.Debug("Skip", osPathname, " not a playbook ", err.Error())
 		return
 	}
 	if len(playbook.Plays) == 0 {
-		fmt.Println("No play found inside the playbook: ", osPathname)
+		log.Debug("No play found inside the playbook: ", osPathname)
 		return
 	}
 	if playbook.Plays[0].Hosts == utils.EmptyString {
-		fmt.Println("No play found inside the playbook: ", osPathname)
+		log.Debug("No play found inside the playbook: ", osPathname)
 		return
 	}
 
@@ -65,11 +66,10 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 	absRoot, err := filepath.Abs(rootPath)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
 
-	fmt.Println("reading playbook")
 	// Merge Play, Role and Task Tags for a playbook
 	allTags := utils.NewSet()
 
@@ -90,10 +90,10 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 			for _, play := range playbook.Plays {
 
 				allTags.Concat(play.AllTags().List())
-				fmt.Println("Play tags are: ", play.Tags)
+				log.Debug("Play tags are: ", play.Tags)
 				for _, role := range play.Roles {
 					role.ReadRoleTasks(rootPath)
-					fmt.Println("  Role info", role.AllTags())
+					log.Debug("  Role info", role.AllTags())
 					allTags.Concat(role.AllTags().List())
 				}
 			}
@@ -102,7 +102,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 			playbook.rootPath = &rootPath
 
 			result = append(result, &playbook)
-			fmt.Println("Available tags are :", playbook.AllTags())
+			log.Debug("Available tags are :", playbook.AllTags())
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {

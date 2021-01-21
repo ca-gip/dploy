@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ca-gip/dploy/cmd"
 	"github.com/ca-gip/dploy/internal/ansible"
+	log "github.com/sirupsen/logrus"
 	"os"
 )
 
@@ -12,9 +13,7 @@ func main() {
 	home, _ := os.UserHomeDir()
 	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-mock")
 	k8s := ansible.LoadFromPath(path)
-	fmt.Println("Filtering ", len(k8s.Inventories), "/", len(k8s.Inventories))
-
-	fmt.Println("Playbooks")
+	log.Debug("Filtering ", len(k8s.Inventories), "/", len(k8s.Inventories))
 
 	tpl := ansible.AnsibleCommandTpl{
 		Inventory:         k8s.Inventories,

@@ -1,7 +1,6 @@
 package ansible
 
 import (
-	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
@@ -90,11 +89,10 @@ func TestTask(t *testing.T) {
 		assert.NotEmpty(t, task)
 
 		expected := Task{
-			Name: "",
+			Name: utils.EmptyString,
 			Tags: *utils.NewSetFromSlice("tasktag1"),
 		}
 
-		fmt.Println("task read", task)
 		if diff := deep.Equal(expected, task[0]); len(diff) != 0 {
 			t.Error(diff)
 		}

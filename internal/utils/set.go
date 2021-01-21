@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -55,27 +54,23 @@ func (s *Set) Contains(value string) bool {
 }
 
 // Read Struct Field to return the associated Tag name
-// omitempty can be specified
+// It's used to read string or slice of string due to different notation in yaml
 func (s *Set) UnmarshalYAML(unmarshal func(i interface{}) error) (err error) {
-	var tmpSlice []string
-	var tmpString string
+	var sliceReceiver []string
+	var stringReceiver string
 
-	if err = unmarshal(&tmpSlice); err == nil {
-		s.m = make(map[string]emptyType, len(tmpSlice))
-
-		for _, v := range tmpSlice {
-			s.m[v] = emptyType{} // add 1 to k as it is starting at base 0
+	if err = unmarshal(&sliceReceiver); err == nil {
+		s.m = make(map[string]emptyType, len(sliceReceiver))
+		for _, item := range sliceReceiver {
+			s.m[item] = emptyType{}
 		}
-		fmt.Println("slicedd", s)
 		return nil
-	} else if err = unmarshal(&tmpString); err == nil {
-		strSplits := strings.Split(tmpString, ",")
-		s.m = make(map[string]emptyType, len(tmpSlice))
-
-		for _, v := range strSplits {
-			s.m[v] = emptyType{} // add 1 to k as it is starting at base 0
+	} else if err = unmarshal(&stringReceiver); err == nil {
+		strSplits := strings.Split(stringReceiver, ",")
+		s.m = make(map[string]emptyType, len(sliceReceiver))
+		for _, item := range strSplits {
+			s.m[item] = emptyType{}
 		}
-		fmt.Println("slice1", s)
 		return nil
 	}
 	return err
