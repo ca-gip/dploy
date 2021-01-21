@@ -20,7 +20,18 @@ jobs:
           go-version: 1.15
       - name: Run Tests
         run: make test
-      - name: Mesuring Coverage
-        uses: shogo82148/actions-goveralls@v1
+      - name: Convert coverage to lcov
+        uses: jandelgado/gcov2lcov-action@v1.0.2
         with:
-          parallel: true
+          infile: coverage.out
+          outfile: coverage.lcov
+      - name: Coveralls
+        uses: coverallsapp/github-action@v1.0.1
+        with:
+          github-token: ${{ secrets.github_token }}
+          path-to-lcov: coverage.lcov
+      - name: Coveralls
+        uses: coverallsapp/github-action@v1.0.1
+        with:
+          github-token: ${{ secrets.github_token }}
+          path-to-lcov: coverage.lcov
