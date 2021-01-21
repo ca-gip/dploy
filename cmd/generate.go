@@ -76,8 +76,9 @@ func init() {
 	rootCmd.AddCommand(generateCmd)
 
 	generateCmd.Flags().StringSliceP("filter", "", nil, `filters inventory based its on vars ex: "foo==bar,bar!=foo""`)
-	generateCmd.Flags().StringP("playbook", "p", "", "playbook to run")
 	_ = generateCmd.MarkFlagRequired("filter")
+
+	generateCmd.Flags().StringP("playbook", "p", "", "playbook to run")
 	_ = generateCmd.MarkFlagRequired("playbook")
 
 	// Ansible params
