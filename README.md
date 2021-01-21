@@ -1,4 +1,4 @@
-# dploy
+# dploy ![test](https://github.com/ca-gip/dploy/workflows/test/badge.svg)
 
 Ansible deployment toolbox
 
