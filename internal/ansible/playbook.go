@@ -3,59 +3,27 @@ package ansible
 import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
+	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
-	"gopkg.in/yaml.v2"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 )
 
-type Playbook struct {
-	absolutePath string
-	rootPath     *string
-	Plays        []Play
+type Tasks struct {
+	Tags []string `yaml:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
-const decoderTagName = "tags"
-
-func (playbook *Playbook) AllTags() (tags *utils.Set) {
-	tags = utils.NewSet()
-	for _, play := range playbook.Plays {
-		tags.Concat(play.AllTags().List())
-	}
-	return
+type Playbook struct {
+	AbsolutePath string
+	RootPath     *string
+	Plays        []Play
+	AllTags      utils.Set
 }
 
 func (playbook *Playbook) RelativePath() string {
-	return strings.TrimPrefix(playbook.absolutePath, *playbook.rootPath+"/")
-}
-
-func ReadFromFile(osPathname string) (playbook Playbook) {
-	// Try to check playbook content
-	binData, err := ioutil.ReadFile(osPathname)
-
-	// IMPORTANT: Yaml and Json parser need a root element,
-	// They can't read a raw list.
-	content := fmt.Sprintf("plays:\n%s", string(binData))
-
-	if err != nil {
-		fmt.Println("Cannot read playbook", osPathname, ". Error: ", err.Error())
-		return
-	}
-	err = yaml.Unmarshal([]byte(content), &playbook)
-	if err != nil {
-		fmt.Println("Skip", osPathname, " not a playbook ", err.Error())
-		return
-	}
-	if len(playbook.Plays) == 0 {
-		fmt.Println("No play found inside the playbook: ", osPathname)
-		return
-	}
-	if playbook.Plays[0].Hosts == utils.EmptyString {
-		fmt.Println("No play found inside the playbook: ", osPathname)
-		return
-	}
-	return
+	return strings.TrimPrefix(playbook.AbsolutePath, *playbook.RootPath+"/")
 }
 
 // Gather playbook files from a Parent directory
@@ -68,13 +36,12 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 		return
 	}
 
-	fmt.Println("reading playbook")
 	// Merge Play, Role and Task Tags for a playbook
 	allTags := utils.NewSet()
 
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
-			if strings.Contains(de.Name(), "vars") || de.Name() == "template" || de.Name() == "roles" {
+			if strings.Contains(osPathname, "vars") || strings.Contains(osPathname, "template") {
 				return godirwalk.SkipThis
 			}
 
@@ -83,25 +50,43 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 			}
 
 			// Try to check playbook content
-			playbook := ReadFromFile(osPathname)
+			var plays []Play
+			binData, err := ioutil.ReadFile(osPathname)
+			if err != nil {
+				log.Error("Cannot read playbook", osPathname, ". Error: ", err.Error())
+				return nil
+			}
+			err = yaml.Unmarshal([]byte(binData), &plays)
+			if err != nil {
+				log.Error("Cannot unmashal playbook data", osPathname, ". Error: ", err.Error())
+				return nil
+			}
+			if plays == nil || len(plays) == 0 {
+				log.Debug("No play found inside the playbook: ", osPathname)
+				return nil
+			}
+			if plays[0].Hosts == utils.EmptyString {
+				log.Debug("No play found inside the playbook: ", osPathname)
+				return nil
+			}
 
 			// Browse Role Tags
-			for _, play := range playbook.Plays {
-
-				allTags.Concat(play.AllTags().List())
-				fmt.Println("Play tags are: ", play.Tags)
+			for _, play := range plays {
+				allTags.Concat(play.Tags)
 				for _, role := range play.Roles {
-					role.ReadRoleTasks(rootPath)
-					fmt.Println("  Role info", role.AllTags())
-					allTags.Concat(role.AllTags().List())
+					role.ReadRole(rootPath)
+					allTags.Concat(role.Tags)
 				}
 			}
 
-			playbook.absolutePath = osPathname
-			playbook.rootPath = &rootPath
-
+			playbook := Playbook{
+				RootPath:     &rootPath,
+				AbsolutePath: osPathname,
+				Plays:        plays,
+				AllTags:      *allTags,
+			}
 			result = append(result, &playbook)
-			fmt.Println("Available tags are :", playbook.AllTags())
+			log.Debug("Available tags are :", playbook.AllTags)
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {

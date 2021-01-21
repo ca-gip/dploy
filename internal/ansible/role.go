@@ -1,10 +1,10 @@
 package ansible
 
 import (
-	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
+	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
-	"gopkg.in/yaml.v2"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -12,35 +12,26 @@ import (
 
 type Role struct {
 	AbsolutePath string
-	Name         string    `yaml:"role"`
-	Tasks        []Task    `yaml:"tasks"`
-	Tags         utils.Set `yaml:"tags"`
-}
-
-func (role *Role) AllTags() (tags *utils.Set) {
-	tags = utils.NewSet()
-	for _, task := range role.Tasks {
-		tags.Concat(task.Tags.List())
-	}
-	tags.Concat(role.Tags.List())
-	return
+	Name         string `yaml:"role"`
+	Tasks        []Tasks
+	Tags         []string `yaml:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 // Gather inventory files from a Parent directory
 // Using a recursive scan. All non inventory files are ignored ( not .ini file )
 // All sub parent directory added like label in the inventory
-func (role *Role) ReadRoleTasks(rootPath string, pathTags ...string) (err error) {
+func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 	absRoot, err := filepath.Abs(rootPath + "/roles/" + role.Name)
-	fmt.Println("reading ", role.Name, "at: ", absRoot)
 
 	if err != nil {
-		fmt.Println("The role ", role.Name, "can't be read. Error:", err.Error())
+		log.Error("The role ", role.Name, "can't be read. Error:", err.Error())
 		return
 	}
 
-	fmt.Println(role.Name)
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
+
+			tags := utils.NewSet()
 
 			if !strings.Contains(filepath.Base(osPathname), ".yml") {
 				return nil
@@ -48,27 +39,22 @@ func (role *Role) ReadRoleTasks(rootPath string, pathTags ...string) (err error)
 
 			binData, err := ioutil.ReadFile(osPathname)
 			if err != nil {
-				fmt.Println("Cannot read file: ", osPathname, ". Error:", err.Error())
+				log.Error("Cannot read file: ", osPathname, ". Error:", err.Error())
 			}
 
 			var tasks []Task
 			err = yaml.Unmarshal([]byte(binData), &tasks)
-
-			if err != nil {
-				fmt.Println("Error reading role", osPathname, "err:", err.Error())
-			} else {
-				fmt.Println("Task is", tasks)
-			}
-
 			for _, task := range tasks {
-				role.Tasks = append(role.Tasks, task)
+				tags.Concat(task.Tags)
 			}
-			fmt.Println(osPathname, "tags in role tags:", role.AllTags())
 
+			tasks = append(tasks, Task{Tags: tags.List()})
+			if len(tags.List()) > 0 {
+				log.Info("Task tags:", tags.List())
+			}
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
-			fmt.Println(err.Error())
 			return godirwalk.SkipNode
 		},
 		Unsorted: true,
