@@ -10,7 +10,7 @@ import (
 func main() {
 
 	home, _ := os.UserHomeDir()
-	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-kube")
+	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-mock")
 	k8s := ansible.LoadFromPath(path)
 	fmt.Println("Filtering ", len(k8s.Inventories), "/", len(k8s.Inventories))
 
