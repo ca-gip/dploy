@@ -66,7 +66,7 @@ func (s *Set) UnmarshalYAML(unmarshal func(i interface{}) error) (err error) {
 		for _, v := range tmpSlice {
 			s.m[v] = emptyType{} // add 1 to k as it is starting at base 0
 		}
-		fmt.Println("slice string read", s)
+		fmt.Println("slicedd", s)
 		return nil
 	} else if err = unmarshal(&tmpString); err == nil {
 		strSplits := strings.Split(tmpString, ",")
@@ -75,7 +75,7 @@ func (s *Set) UnmarshalYAML(unmarshal func(i interface{}) error) (err error) {
 		for _, v := range strSplits {
 			s.m[v] = emptyType{} // add 1 to k as it is starting at base 0
 		}
-		fmt.Println("string", s)
+		fmt.Println("slice1", s)
 		return nil
 	}
 	return err

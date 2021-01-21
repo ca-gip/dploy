@@ -1,41 +1,47 @@
 package ansible
 
 import (
+	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
-	"github.com/ghodss/yaml"
 	"github.com/karrick/godirwalk"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"k8s.io/klog/v2"
 	"path/filepath"
 	"strings"
 )
 
 type Role struct {
 	AbsolutePath string
-	Name         string      `json:"name" yaml:"role,flow"`
-	rawTags      interface{} `json:"tags" yaml:"tags,flow"`
-	Tasks        []Tasks
+	Name         string    `yaml:"role"`
+	Tasks        []Task    `yaml:"tasks"`
+	Tags         utils.Set `yaml:"tags"`
 }
 
-func (role *Role) Tags() []string {
-	return utils.InferSlice(role.rawTags)
+func (role *Role) AllTags() (tags *utils.Set) {
+	tags = utils.NewSet()
+	for _, task := range role.Tasks {
+		tags.Concat(task.Tags.List())
+	}
+	fmt.Println("tags:::", tags.List())
+	tags.Concat(role.Tags.List())
+	return
 }
 
 // Gather inventory files from a Parent directory
 // Using a recursive scan. All non inventory files are ignored ( not .ini file )
 // All sub parent directory added like label in the inventory
-func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
+func (role *Role) ReadRoleTasks(rootPath string, pathTags ...string) (err error) {
 	absRoot, err := filepath.Abs(rootPath + "/roles/" + role.Name)
+	fmt.Println("reading ", role.Name, "at: ", absRoot)
 
 	if err != nil {
-		klog.Error("The role ", role.Name, "can't be read. Error:", err.Error())
+		fmt.Println("The role ", role.Name, "can't be read. Error:", err.Error())
 		return
 	}
 
+	fmt.Println(role.Name)
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
-
-			tags := utils.NewSet()
 
 			if !strings.Contains(filepath.Base(osPathname), ".yml") {
 				return nil
@@ -43,24 +49,28 @@ func (role *Role) ReadRole(rootPath string, pathTags ...string) (err error) {
 
 			binData, err := ioutil.ReadFile(osPathname)
 			if err != nil {
-				klog.Error("Cannot read file: ", osPathname, ". Error:", err.Error())
+				fmt.Println("Cannot read file: ", osPathname, ". Error:", err.Error())
 			}
 
 			var tasks []Task
 			err = yaml.Unmarshal([]byte(binData), &tasks)
+
+			if err != nil {
+				fmt.Println("error readin role", osPathname, "err:", err.Error())
+			} else {
+				fmt.Println("task is", tasks)
+			}
+
 			for _, task := range tasks {
-				tags.Concat(task.Tags())
+				role.Tasks = append(role.Tasks, task)
 			}
 
-			klog.Info("tags in role tags:", role.rawTags)
+			fmt.Println(osPathname, "tags in role tags:", role.AllTags())
 
-			tasks = append(tasks, Task{rawTags: tags.List()})
-			if len(tags.List()) > 0 {
-				klog.Info("Task tags:", tags.List())
-			}
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
+			fmt.Println(err.Error())
 			return godirwalk.SkipNode
 		},
 		Unsorted: true,

@@ -1,13 +1,14 @@
 package ansible
 
 import (
-	"github.com/ghodss/yaml"
+	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 	"testing"
 )
 
-const validPlaybook = `
+const validPlaybook1 = `
 - hosts: aws-node
   gather_facts: no
   roles:
@@ -17,24 +18,70 @@ const validPlaybook = `
   tags: always,alwaystest
 `
 
-func TestReadFromFile(t *testing.T) {
+var expectedValidPlaybook1 = Play{
+	Hosts: "aws-node",
+	Roles: []Role{
+		{
+			Name: "add-aws-facts",
+			Tags: *utils.NewSetFromSlice("add-aws-facts"),
+		},
+	},
+	Tags: *utils.NewSetFromSlice("always", "alwaystest"),
+}
 
-	t.Run("with a valid play and tags", func(t *testing.T) {
-		binData := []byte(validPlaybook)
+func Test(t *testing.T) {
+
+	t.Run("with a valid play data", func(t *testing.T) {
+		binData := []byte(validPlaybook1)
 		var plays []Play
 		err := yaml.Unmarshal([]byte(binData), &plays)
 		assert.Nil(t, err)
 		assert.NotNil(t, plays)
 		assert.NotEmpty(t, plays)
 
-		deep.Equal(plays[0], Play{
+		//deep.CompareUnexportedFields = false
+		if diff := deep.Equal(plays[0], expectedValidPlaybook1); diff != nil {
+			t.Error(diff)
+		}
+		assert.Equal(t, plays[0], expectedValidPlaybook1)
+
+		// Not so deep ?
+		if diff := deep.Equal(plays[0].Roles[0].Tags.List(), expectedValidPlaybook1.Roles[0].Tags.List()); diff != nil {
+			t.Error(diff)
+		}
+
+		if diff := deep.Equal(plays[0].Roles[0].Tags.List(), expectedValidPlaybook1.Roles[0].Tags.List()); diff != nil {
+			t.Error(diff)
+		}
+	})
+
+	t.Run("with two different play should be different deep.Equals", func(t *testing.T) {
+		//deep.CompareUnexportedFields = false
+		var left = Play{
 			Hosts: "aws-node",
 			Roles: []Role{
-				{Name: "add-aws-facts"},
+				{
+					Name: "add-aws-facts",
+					Tags: *utils.NewSetFromSlice("left"),
+				},
 			},
-			RawTags: []string{"add-aws-facts"},
-		})
+			Tags: *utils.NewSetFromSlice("left", "Left"),
+		}
 
+		var right = Play{
+			Hosts: "aws-node",
+			Roles: []Role{
+				{
+					Name: "add-aws-facts",
+					Tags: *utils.NewSetFromSlice("left"),
+				},
+			},
+			Tags: *utils.NewSetFromSlice("right", "Right"),
+		}
+		// Not so deep ?
+		if diff := deep.Equal(left, right); len(diff) != 0 {
+			t.Error(diff)
+		}
 	})
 
 }

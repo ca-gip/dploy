@@ -20,15 +20,6 @@ const validTaskWithoutName = `
   tags: tasktag1
 `
 
-const validMultiTask = `
-- template: src="source" dest="destination" owner=root
-  tags: tasktag1
-
-- name: task2
-  template: src="source" dest="destination" owner=root
-  tags: tasktag2
-`
-
 var expectedValidTask1 = Task{
 	Name: "Task1",
 	Tags: *utils.NewSetFromSlice("tasktag1"),
@@ -105,24 +96,6 @@ func TestTask(t *testing.T) {
 
 		fmt.Println("task read", task)
 		if diff := deep.Equal(expected, task[0]); len(diff) != 0 {
-			t.Error(diff)
-		}
-	})
-
-	t.Run("with multitask should have tags", func(t *testing.T) {
-		binData := []byte(validMultiTask)
-		var tasks []Task
-		err := yaml.Unmarshal([]byte(binData), &tasks)
-
-		assert.Nil(t, err)
-		assert.NotNil(t, tasks)
-		assert.NotEmpty(t, tasks)
-		assert.Len(t, tasks, 2)
-
-		expected := *utils.NewSetFromSlice("tasktag1", "tasktag2")
-		actual := utils.NewSet().Concat(tasks[0].Tags.List()).Concat(tasks[1].Tags.List())
-
-		if diff := deep.Equal(expected.List(), actual.List()); len(diff) != 0 {
 			t.Error(diff)
 		}
 	})

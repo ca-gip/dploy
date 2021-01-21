@@ -22,6 +22,9 @@ func InferSlice(input interface{}) (slice []string) {
 		return
 	case reflect.String:
 		slice = strings.Split(value.String(), ",")
+		fmt.Println("String find type for", value)
+		fmt.Println("String find type for", slice)
+		return slice
 	default:
 		fmt.Println("cannot find type for", value)
 	}
