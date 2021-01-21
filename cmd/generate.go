@@ -29,8 +29,7 @@ import (
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate ansible-playbook command",
-	Long: `
-TODO`,
+	Long:  `TODO...`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		curr, _ := os.Getwd()
