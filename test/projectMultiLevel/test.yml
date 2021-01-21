@@ -1,0 +1,12 @@
+- hosts: worker
+  gather_facts: yes
+  roles:
+  - { role: existing-role-1, tags: [ "existing-role", "role-1" ] }
+  tags: playtag1
+
+- hosts: unexisting-group
+  gather_facts: yes
+  serial: 100%
+  roles:
+  - { role: missingRole, tags: [ "missing-role", "role-2" ] }
+  tags: playtag2

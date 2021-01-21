@@ -1,0 +1,17 @@
+
+
+# Gather facts about a particular instance using ID
+- name: Gathering Fact to compute aws node ips
+  ec2_instance_facts:
+    filters:
+      instance.group-name: "dploy.{{ dns_iaas_domain }}"
+      "tag:Tenant": "{{ customer | lower }}"
+  delegate_to: localhost
+  register: groupname
+  run_once: true
+  tags: test1
+
+- name: Display to host group
+  delegate_to: localhost
+  debug: msg="{{ ansible_host }} - {{ inventory_hostname }}"
+  tags: test3

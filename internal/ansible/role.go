@@ -22,7 +22,6 @@ func (role *Role) AllTags() (tags *utils.Set) {
 	for _, task := range role.Tasks {
 		tags.Concat(task.Tags.List())
 	}
-	fmt.Println("tags:::", tags.List())
 	tags.Concat(role.Tags.List())
 	return
 }
@@ -56,15 +55,14 @@ func (role *Role) ReadRoleTasks(rootPath string, pathTags ...string) (err error)
 			err = yaml.Unmarshal([]byte(binData), &tasks)
 
 			if err != nil {
-				fmt.Println("error readin role", osPathname, "err:", err.Error())
+				fmt.Println("Error reading role", osPathname, "err:", err.Error())
 			} else {
-				fmt.Println("task is", tasks)
+				fmt.Println("Task is", tasks)
 			}
 
 			for _, task := range tasks {
 				role.Tasks = append(role.Tasks, task)
 			}
-
 			fmt.Println(osPathname, "tags in role tags:", role.AllTags())
 
 			return nil
