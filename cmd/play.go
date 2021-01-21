@@ -37,7 +37,7 @@ var playCmd = &cobra.Command{
 
 		rawFilters, _ := cmd.Flags().GetStringSlice("filter")
 		filters := ansible.ParseFilterArgsFromSlice(rawFilters)
-		inventories := project.Inventories.Filter(filters)
+		inventories := project.FilterInventory(filters)
 
 		playbookPath, _ := cmd.Flags().GetString("playbook")
 		playbook, err := project.PlaybookPath(playbookPath)

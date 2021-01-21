@@ -6,13 +6,14 @@ import (
 	"testing"
 )
 
-func TestGetInventoryKeys(t *testing.T) {
+func TestProject_InventoryKeys(t *testing.T) {
+
 	TestCases := map[string]struct {
-		inventories Inventories
+		inventories []*Inventory
 		expect      []string
 	}{
 		"single inventory with no var should return nothing ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{}}},
 				},
@@ -20,7 +21,7 @@ func TestGetInventoryKeys(t *testing.T) {
 			expect: nil,
 		},
 		"single inventory with one var should return one key ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": ""}}},
 				},
@@ -28,7 +29,7 @@ func TestGetInventoryKeys(t *testing.T) {
 			expect: []string{"key1"},
 		},
 		"single inventory with two var should return two key ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": "", "key2": ""}}},
 				},
@@ -36,7 +37,7 @@ func TestGetInventoryKeys(t *testing.T) {
 			expect: []string{"key1", "key2"},
 		},
 		"two inventories with same var should return one key ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": ""}}},
 				},
@@ -46,7 +47,7 @@ func TestGetInventoryKeys(t *testing.T) {
 			expect: []string{"key1"},
 		},
 		"two inventories with different var should return two key ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": ""}}},
 				},
@@ -59,7 +60,10 @@ func TestGetInventoryKeys(t *testing.T) {
 
 	for testName, testCase := range TestCases {
 		t.Run(testName, func(t *testing.T) {
-			result := testCase.inventories.GetInventoryKeys()
+			partialProject := Project{
+				Inventories: testCase.inventories,
+			}
+			result := partialProject.InventoryKeys()
 			if testCase.expect == nil {
 				assert.Equal(t, testCase.expect, result)
 			} else {
@@ -71,14 +75,14 @@ func TestGetInventoryKeys(t *testing.T) {
 	}
 }
 
-func TestGetInventoryValues(t *testing.T) {
+func TestProject_InventoryValues(t *testing.T) {
 	TestCases := map[string]struct {
-		inventories Inventories
+		inventories []*Inventory
 		given       string
 		expect      []string
 	}{
 		"single inventory with no var should return nothing ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{}}},
 				},
@@ -87,7 +91,7 @@ func TestGetInventoryValues(t *testing.T) {
 			expect: nil,
 		},
 		"single inventory with one var should return correct value ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": "value1"}}},
 				},
@@ -96,7 +100,7 @@ func TestGetInventoryValues(t *testing.T) {
 			expect: []string{"value1"},
 		},
 		"single inventory with one var should return nothing ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": "value1"}}},
 				},
@@ -105,7 +109,7 @@ func TestGetInventoryValues(t *testing.T) {
 			expect: nil,
 		},
 		"two inventories with same var and value should return one value ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": "value1"}}},
 				},
@@ -116,7 +120,7 @@ func TestGetInventoryValues(t *testing.T) {
 			expect: []string{"value1"},
 		},
 		"two inventories with same var but different value should return two value ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": "value1"}}},
 				},
@@ -127,7 +131,7 @@ func TestGetInventoryValues(t *testing.T) {
 			expect: []string{"value1", "value2"},
 		},
 		"two inventories with different var should return one value ": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": "value1"}}},
 				},
@@ -141,7 +145,10 @@ func TestGetInventoryValues(t *testing.T) {
 
 	for testName, testCase := range TestCases {
 		t.Run(testName, func(t *testing.T) {
-			result := testCase.inventories.GetInventoryValues(testCase.given)
+			partialProject := Project{
+				Inventories: testCase.inventories,
+			}
+			result := partialProject.InventoryValues(testCase.given)
 			if testCase.expect == nil {
 				assert.Equal(t, testCase.expect, result)
 			} else {
@@ -154,14 +161,14 @@ func TestGetInventoryValues(t *testing.T) {
 	}
 }
 
-func TestFilter(t *testing.T) {
+func TestProject_FilterInventory(t *testing.T) {
 	TestCases := map[string]struct {
-		inventories Inventories
+		inventories []*Inventory
 		filters     Filters
 		expect      int
 	}{
 		"two inventories with same var and Equal op should return two": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value"}}},
 				},
@@ -172,7 +179,7 @@ func TestFilter(t *testing.T) {
 			expect:  2,
 		},
 		"two inventories with same var and NotEqual op should return zero": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value"}}},
 				},
@@ -183,7 +190,7 @@ func TestFilter(t *testing.T) {
 			expect:  0,
 		},
 		"two inventories different var and NotEqual op should return one": {
-			inventories: Inventories{{
+			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value"}}},
 				},
@@ -194,7 +201,7 @@ func TestFilter(t *testing.T) {
 			expect:  1,
 		},
 		"key==value,foo==bar,bar==foo should return two inventory": {
-			inventories: Inventories{
+			inventories: []*Inventory{
 				{Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
 				}}, {Data: &aini.InventoryData{
@@ -210,7 +217,7 @@ func TestFilter(t *testing.T) {
 			expect:  2,
 		},
 		"key==value,foo==bar,bar!=foo should return two inventory": {
-			inventories: Inventories{
+			inventories: []*Inventory{
 				{Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
 				}}, {Data: &aini.InventoryData{
@@ -226,7 +233,7 @@ func TestFilter(t *testing.T) {
 			expect:  1,
 		},
 		"key==value,foo==bar,bar==oof should return one inventory": {
-			inventories: Inventories{
+			inventories: []*Inventory{
 				{Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
 				}}, {Data: &aini.InventoryData{
@@ -242,7 +249,7 @@ func TestFilter(t *testing.T) {
 			expect:  1,
 		},
 		"key==value,foo!=bar,bar==oof should return one inventory": {
-			inventories: Inventories{
+			inventories: []*Inventory{
 				{Data: &aini.InventoryData{
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key": "value", "foo": "bar", "bar": "foo"}}},
 				}}, {Data: &aini.InventoryData{
@@ -261,7 +268,10 @@ func TestFilter(t *testing.T) {
 
 	for testName, testCase := range TestCases {
 		t.Run(testName, func(t *testing.T) {
-			result := testCase.inventories.Filter(testCase.filters)
+			partialProject := Project{
+				Inventories: testCase.inventories,
+			}
+			result := partialProject.FilterInventory(testCase.filters)
 			assert.Equal(t, testCase.expect, len(result))
 
 		})

@@ -37,7 +37,7 @@ var generateCmd = &cobra.Command{
 
 		rawFilters, _ := cmd.Flags().GetStringSlice("filter")
 		filters := ansible.ParseFilterArgsFromSlice(rawFilters)
-		inventories := project.Inventories.Filter(filters)
+		inventories := project.FilterInventory(filters)
 
 		playbookPath, _ := cmd.Flags().GetString("playbook")
 		playbook, err := project.PlaybookPath(playbookPath)
@@ -107,7 +107,7 @@ func init() {
 		curr, _ := os.Getwd()
 		k8s := ansible.Projects.LoadFromPath(curr)
 
-		availableKeys := k8s.Inventories.GetInventoryKeys()
+		availableKeys := k8s.InventoryKeys()
 
 		blank := key == "" && op == "" && value == ""
 		if blank {
@@ -142,7 +142,7 @@ func init() {
 			for _, allowedOperator := range ansible.AllowedOperators {
 
 				if op == allowedOperator {
-					availableValues := k8s.Inventories.GetInventoryValues(key)
+					availableValues := k8s.InventoryValues(key)
 
 					var prefixedValues []string
 
@@ -165,7 +165,7 @@ func init() {
 			}
 
 			if len(prefixedOperator) == 1 {
-				availableValues := k8s.Inventories.GetInventoryValues(key)
+				availableValues := k8s.InventoryValues(key)
 
 				_, foundOp, _ := ansible.ParseFilter(prefixedOperator[0])
 
@@ -190,7 +190,7 @@ func init() {
 			for _, allowedOperator := range ansible.AllowedOperators {
 
 				if op == allowedOperator {
-					availableValues := k8s.Inventories.GetInventoryValues(key)
+					availableValues := k8s.InventoryValues(key)
 
 					var prefixedValues []string
 
@@ -210,7 +210,7 @@ func init() {
 
 		}
 
-		return k8s.Inventories.GetInventoryKeys(), cobra.ShellCompDirectiveDefault
+		return k8s.InventoryKeys(), cobra.ShellCompDirectiveDefault
 
 	})
 

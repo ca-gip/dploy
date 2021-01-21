@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+type inventories struct{}
+
+var Inventories = inventories{}
+
 type Inventory struct {
 	AbsolutePath string
 	RootPath     *string
@@ -36,10 +40,12 @@ func (i *Inventory) RelativePath() string {
 	return strings.TrimPrefix(i.AbsolutePath, *i.RootPath+"/")
 }
 
+//func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error) {
+
 // Gather inventory files UnmarshallPath a Parent directory
 // Using a recursive scan. All non inventory files are ignored ( not .ini file )
 // All sub parent directory added like label in the inventory
-func readInventories(rootPath string) (result []*Inventory, err error) {
+func (i inventories) LoadFromPath(rootPath string) (result []*Inventory, err error) {
 	absRoot, err := filepath.Abs(rootPath)
 
 	if err != nil {
