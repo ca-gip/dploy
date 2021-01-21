@@ -33,14 +33,14 @@ var playCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		curr, _ := os.Getwd()
-		project := ansible.LoadFromPath(curr)
+		project := ansible.Projects.LoadFromPath(curr)
 
 		rawFilters, _ := cmd.Flags().GetStringSlice("filter")
 		filters := ansible.ParseFilterArgsFromSlice(rawFilters)
 		inventories := project.Inventories.Filter(filters)
 
 		playbookPath, _ := cmd.Flags().GetString("playbook")
-		playbook := project.Playbooks.GetPlaybook(playbookPath)
+		playbook := project.PlaybookPath(playbookPath)
 
 		if playbook == nil {
 			log.Fatalf(`%s not a valid path`, playbookPath)

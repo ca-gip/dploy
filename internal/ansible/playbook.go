@@ -64,7 +64,7 @@ func (p *playbooks) unmarshallFromPath(playbookPath string) (playbook *Playbook)
 
 // Gather playbook files UnmarshallPath a Parent directory
 // Using a recursive scan. All non playbook files are ignored ( not .yaml or .yml file )
-func LoadFromPath(rootPath string) (result []Playbook, err error) {
+func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error) {
 	absRoot, err := filepath.Abs(rootPath)
 
 	if err != nil {

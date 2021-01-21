@@ -38,7 +38,7 @@ func (projects *projects) LoadFromPath(projectDirectory string) (project Project
 		Playbooks: nil,
 	}
 
-	playbooks, errPlaybooks := LoadFromPath(projectDirectory)
+	playbooks, errPlaybooks := Playbooks.LoadFromPath(projectDirectory)
 	inventories, errInventories := readInventories(projectDirectory)
 	project.Playbooks = playbooks
 	project.Inventories = inventories

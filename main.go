@@ -15,7 +15,7 @@ func main() {
 	k8s := ansible.Projects.LoadFromPath(path)
 	log.Debug("Filtering ", len(k8s.Inventories), "/", len(k8s.Inventories))
 
-	tpl := ansible.AnsibleCommandTpl{
+	tpl := ansible.Command{
 		Inventory:         k8s.Inventories,
 		Playbook:          &k8s.Playbooks[0],
 		Tags:              []string{"tag1", "tag2"},
