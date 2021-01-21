@@ -1,39 +1,26 @@
 package execution
 
 import (
-	"bytes"
-	"fmt"
 	ansibler "github.com/apenella/go-ansible"
-	"github.com/apenella/go-ansible/stdoutcallback/results"
 	"github.com/ca-gip/dploy/internal/ansible"
 	"strings"
 )
 
-func Exec(command ansible.Command) {
-	var err error
-	res := &results.AnsiblePlaybookJSONResults{}
-	buff := new(bytes.Buffer)
-
+func Exec(command ansible.Command) (err error) {
 	for _, playbook := range MakeCommands(command) {
+		ansibler.AnsibleForceColor()
 		err = playbook.Run()
 		if err != nil {
-			fmt.Println(err.Error())
+			return
 		}
-
-		res, err = results.JSONParse(buff.Bytes())
-
-		if err != nil {
-			fmt.Printf("there is an error %s", err)
-		}
-
-		fmt.Println(res.String())
 	}
+	return
 }
 
 func MakeCommands(command ansible.Command) (commands []ansibler.AnsiblePlaybookCmd) {
 	for _, inventory := range command.Inventory {
 		ansiblePlaybookOptions := &ansibler.AnsiblePlaybookOptions{
-			Inventory:         inventory.AbsolutePath,
+			Inventory:         inventory.RelativePath(),
 			Limit:             strings.Join(command.Limit, ","),
 			Tags:              strings.Join(command.Tags, ","),
 			VaultPasswordFile: command.VaultPasswordFile,
