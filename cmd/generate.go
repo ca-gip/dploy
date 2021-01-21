@@ -55,7 +55,7 @@ TODO`,
 		vaultPassFile, _ := cmd.Flags().GetString("vault-password-file")
 		askVaultPass, _ := cmd.Flags().GetBool("ask-vault-password")
 
-		commands := &ansible.AnsibleCommandTpl{
+		commands := &ansible.Command{
 			Inventory:         inventories,
 			Playbook:          playbook,
 			Tags:              tags,

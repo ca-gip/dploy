@@ -5,7 +5,7 @@ import (
 	"text/template"
 )
 
-type AnsibleCommandTpl struct {
+type Command struct {
 	Inventory         []*Inventory
 	Playbook          *Playbook
 	Tags              []string
@@ -29,7 +29,7 @@ ansible-playbook -i {{ $inventory.RelativePath }} {{ $.Playbook.RelativePath }}
 {{- end }}
 `
 
-func (tpl *AnsibleCommandTpl) GenerateCmd() {
+func (tpl *Command) GenerateCmd() {
 	tmpl, _ := template.New("test").Parse(templateBash)
 	tmpl.Execute(os.Stdout, tpl)
 }
