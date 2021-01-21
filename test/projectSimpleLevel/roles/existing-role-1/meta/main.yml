@@ -1,0 +1,2 @@
+dependencies:
+  - { role: add-extra-groupvars }

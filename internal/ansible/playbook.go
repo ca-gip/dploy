@@ -55,7 +55,6 @@ func ReadFromFile(osPathname string) (playbook Playbook) {
 		fmt.Println("No play found inside the playbook: ", osPathname)
 		return
 	}
-
 	return
 }
 

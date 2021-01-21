@@ -16,7 +16,6 @@ func (play *Play) AllTags() (tags *utils.Set) {
 	for _, role := range play.Roles {
 		tags = tags.Concat(role.AllTags().List())
 		fmt.Println("role loop tags list is: ", tags.List())
-
 	}
 	tags.Concat(play.Tags.List())
 	fmt.Println("play tags list is: ", tags.List())
