@@ -233,7 +233,7 @@ func init() {
 		project := ansible.LoadFromPath(curr)
 		playbook := project.Playbooks.GetPlaybook(playbookPath)
 
-		return playbook.AllTags.List(), cobra.ShellCompDirectiveDefault
+		return playbook.AllTags().List(), cobra.ShellCompDirectiveDefault
 
 	})
 
