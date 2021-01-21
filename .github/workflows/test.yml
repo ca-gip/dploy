@@ -20,3 +20,8 @@ jobs:
           go-version: 1.15
       - name: Run Tests
         run: make test
+      - name: Mesuring Coverage
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: profile.cov
+          parallel: true
