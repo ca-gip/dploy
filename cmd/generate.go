@@ -33,14 +33,14 @@ var generateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		curr, _ := os.Getwd()
-		project := ansible.LoadFromPath(curr)
+		project := ansible.Projects.LoadFromPath(curr)
 
 		rawFilters, _ := cmd.Flags().GetStringSlice("filter")
 		filters := ansible.ParseFilterArgsFromSlice(rawFilters)
 		inventories := project.Inventories.Filter(filters)
 
 		playbookPath, _ := cmd.Flags().GetString("playbook")
-		playbook := project.Playbooks.GetPlaybook(playbookPath)
+		playbook := project.PlaybookPath(playbookPath)
 
 		if playbook == nil {
 			log.Fatalf(`%s not a valid path`, playbookPath)
@@ -105,7 +105,7 @@ func init() {
 		cobra.CompDebug(fmt.Sprintf("key:%s op:%s value:%s", key, op, value), true)
 
 		curr, _ := os.Getwd()
-		k8s := ansible.LoadFromPath(curr)
+		k8s := ansible.Projects.LoadFromPath(curr)
 
 		availableKeys := k8s.Inventories.GetInventoryKeys()
 
@@ -216,8 +216,8 @@ func init() {
 
 	_ = generateCmd.RegisterFlagCompletionFunc("playbook", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		curr, _ := os.Getwd()
-		k8s := ansible.LoadFromPath(curr)
-		return k8s.Playbooks.GetPlaybooks(), cobra.ShellCompDirectiveDefault
+		k8s := ansible.Projects.LoadFromPath(curr)
+		return k8s.PlaybookPaths(), cobra.ShellCompDirectiveDefault
 	})
 
 	_ = generateCmd.RegisterFlagCompletionFunc("tags", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -230,8 +230,8 @@ func init() {
 		}
 
 		curr, _ := os.Getwd()
-		project := ansible.LoadFromPath(curr)
-		playbook := project.Playbooks.GetPlaybook(playbookPath)
+		project := ansible.Projects.LoadFromPath(curr)
+		playbook := project.PlaybookPath(playbookPath)
 
 		return playbook.AllTags().List(), cobra.ShellCompDirectiveDefault
 

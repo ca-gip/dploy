@@ -11,13 +11,15 @@ import (
 	"strings"
 )
 
+type playbooks struct{}
+
+var Playbooks = playbooks{}
+
 type Playbook struct {
 	absolutePath string
 	rootPath     *string
 	Plays        []Play
 }
-
-const decoderTagName = "tags"
 
 func (playbook *Playbook) AllTags() (tags *utils.Set) {
 	tags = utils.NewSet()
@@ -31,38 +33,38 @@ func (playbook *Playbook) RelativePath() string {
 	return strings.TrimPrefix(playbook.absolutePath, *playbook.rootPath+"/")
 }
 
-func ReadFromFile(osPathname string) (playbook Playbook) {
+// Unmarshall a playbook from file
+func (p *playbooks) unmarshallFromPath(playbookPath string) (playbook *Playbook) {
 	// Try to check playbook content
-	binData, err := ioutil.ReadFile(osPathname)
+	binData, err := ioutil.ReadFile(playbookPath)
 
 	// IMPORTANT: Yaml and Json parser need a root element,
 	// They can't read a raw list.
 	content := fmt.Sprintf("plays:\n%s", string(binData))
 
 	if err != nil {
-		log.Error("Cannot read playbook", osPathname, ". Error: ", err.Error())
+		log.Error("Cannot read playbook", playbookPath, ". Error: ", err.Error())
 		return
 	}
 	err = yaml.Unmarshal([]byte(content), &playbook)
 	if err != nil {
-		log.Debug("Skip", osPathname, " not a playbook ", err.Error())
+		log.Debug("Skip", playbookPath, " not a playbook ", err.Error())
 		return
 	}
 	if len(playbook.Plays) == 0 {
-		log.Debug("No play found inside the playbook: ", osPathname)
+		log.Debug("No play found inside the playbook: ", playbookPath)
 		return
 	}
 	if playbook.Plays[0].Hosts == utils.EmptyString {
-		log.Debug("No play found inside the playbook: ", osPathname)
+		log.Debug("No play found inside the playbook: ", playbookPath)
 		return
 	}
-
 	return
 }
 
-// Gather playbook files from a Parent directory
+// Gather playbook files UnmarshallPath a Parent directory
 // Using a recursive scan. All non playbook files are ignored ( not .yaml or .yml file )
-func readPlaybook(rootPath string) (result []*Playbook, err error) {
+func LoadFromPath(rootPath string) (result []Playbook, err error) {
 	absRoot, err := filepath.Abs(rootPath)
 
 	if err != nil {
@@ -84,7 +86,7 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 			}
 
 			// Try to check playbook content
-			playbook := ReadFromFile(osPathname)
+			playbook := Playbooks.unmarshallFromPath(osPathname)
 
 			// Browse Role Tags
 			for _, play := range playbook.Plays {
@@ -92,16 +94,19 @@ func readPlaybook(rootPath string) (result []*Playbook, err error) {
 				allTags.Concat(play.AllTags().List())
 				log.Debug("Play tags are: ", play.Tags)
 				for _, role := range play.Roles {
-					role.ReadRoleTasks(rootPath)
-					log.Debug("  Role info", role.AllTags())
+					err := role.LoadFromPath(rootPath)
+					if err != nil {
+						log.Debug(err)
+					} else {
+						log.Debug("  Role info", role.AllTags())
+					}
 					allTags.Concat(role.AllTags().List())
 				}
 			}
-
 			playbook.absolutePath = osPathname
 			playbook.rootPath = &rootPath
 
-			result = append(result, &playbook)
+			result = append(result, *playbook)
 			log.Debug("Available tags are :", playbook.AllTags())
 			return nil
 		},

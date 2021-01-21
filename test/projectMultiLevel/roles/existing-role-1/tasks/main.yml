@@ -9,9 +9,9 @@
   delegate_to: localhost
   register: groupname
   run_once: true
-  tags: test1
+  tags: test1-tag
 
 - name: Display to host group
   delegate_to: localhost
   debug: msg="{{ ansible_host }} - {{ inventory_hostname }}"
-  tags: test3
+  tags: test2-tag

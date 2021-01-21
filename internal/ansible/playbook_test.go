@@ -34,7 +34,7 @@ func Test(t *testing.T) {
 	t.Run("with a valid play data", func(t *testing.T) {
 		binData := []byte(validPlaybook1)
 		var plays []Play
-		err := yaml.Unmarshal([]byte(binData), &plays)
+		err := yaml.Unmarshal(binData, &plays)
 		assert.Nil(t, err)
 		assert.NotNil(t, plays)
 		assert.NotEmpty(t, plays)

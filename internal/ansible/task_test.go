@@ -29,7 +29,7 @@ func TestTask(t *testing.T) {
 	t.Run("with a valid task data should be equals", func(t *testing.T) {
 		binData := []byte(validTask1)
 		var task []Task
-		err := yaml.Unmarshal([]byte(binData), &task)
+		err := yaml.Unmarshal(binData, &task)
 		assert.Nil(t, err)
 		assert.NotNil(t, task)
 		assert.NotEmpty(t, task)
@@ -82,7 +82,7 @@ func TestTask(t *testing.T) {
 	t.Run("without name should have tags", func(t *testing.T) {
 		binData := []byte(validTaskWithoutName)
 		var task []Task
-		err := yaml.Unmarshal([]byte(binData), &task)
+		err := yaml.Unmarshal(binData, &task)
 
 		assert.Nil(t, err)
 		assert.NotNil(t, task)

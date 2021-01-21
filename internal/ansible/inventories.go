@@ -13,7 +13,7 @@ func (inventories Inventories) GetInventoryKeys() (keys []string) {
 	keySet := utils.NewSet()
 	for _, inventory := range inventories {
 		if inventory.Data != nil {
-			for key, _ := range inventory.Data.Groups["all"].Vars {
+			for key := range inventory.Data.Groups["all"].Vars {
 				keySet.Add(key)
 			}
 		}

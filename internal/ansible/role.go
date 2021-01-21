@@ -27,10 +27,10 @@ func (role *Role) AllTags() (tags *utils.Set) {
 	return
 }
 
-// Gather inventory files from a Parent directory
+// Gather inventory files LoadFromPath a Parent directory
 // Using a recursive scan. All non inventory files are ignored ( not .ini file )
 // All sub parent directory added like label in the inventory
-func (role *Role) ReadRoleTasks(rootPath string, pathTags ...string) (err error) {
+func (role *Role) LoadFromPath(rootPath string) (err error) {
 	absRoot, err := filepath.Abs(rootPath + "/roles/" + role.Name)
 	log.Debug("reading ", role.Name, "at: ", absRoot)
 
@@ -52,7 +52,7 @@ func (role *Role) ReadRoleTasks(rootPath string, pathTags ...string) (err error)
 			}
 
 			var tasks []Task
-			err = yaml.Unmarshal([]byte(binData), &tasks)
+			err = yaml.Unmarshal(binData, &tasks)
 
 			if err != nil {
 				log.Debug("Error reading role", osPathname, "err:", err.Error())

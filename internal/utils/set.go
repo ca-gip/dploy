@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"sort"
 	"strings"
 )
 
@@ -41,8 +42,18 @@ func (s *Set) Remove(value string) *Set {
 	return s
 }
 
+// Return a sorted list of values
 func (s *Set) List() (list []string) {
-	for key, _ := range s.m {
+	for key := range s.m {
+		list = append(list, key)
+	}
+	sort.Strings(list)
+	return
+}
+
+// Return a list of values
+func (s *Set) UnsortedList() (list []string) {
+	for key := range s.m {
 		list = append(list, key)
 	}
 	return

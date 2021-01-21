@@ -1,6 +1,7 @@
 package ansible
 
 import (
+	log "github.com/sirupsen/logrus"
 	"os"
 	"text/template"
 )
@@ -31,5 +32,8 @@ ansible-playbook -i {{ $inventory.RelativePath }} {{ $.Playbook.RelativePath }}
 
 func (tpl *Command) GenerateCmd() {
 	tmpl, _ := template.New("test").Parse(templateBash)
-	tmpl.Execute(os.Stdout, tpl)
+	err := tmpl.Execute(os.Stdout, tpl)
+	if err != nil {
+		log.Error(err)
+	}
 }
