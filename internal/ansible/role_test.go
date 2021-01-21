@@ -1,7 +1,6 @@
 package ansible
 
 import (
-	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/go-test/deep"
 	log "github.com/sirupsen/logrus"
@@ -14,13 +13,6 @@ var simpleRole = Role{
 	Tasks: nil,
 	Tags:  utils.Set{},
 }
-
-const testPath = "./../../test"
-
-var (
-	projectMultiLevelPath  = fmt.Sprint(testPath, "/projectMultiLevel")
-	projectSimpleLevelPath = fmt.Sprint(testPath, "/projectSimpleLevel")
-)
 
 func init() {
 	log.SetLevel(log.DebugLevel)

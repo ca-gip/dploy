@@ -40,9 +40,9 @@ var generateCmd = &cobra.Command{
 		inventories := project.Inventories.Filter(filters)
 
 		playbookPath, _ := cmd.Flags().GetString("playbook")
-		playbook := project.PlaybookPath(playbookPath)
+		playbook, err := project.PlaybookPath(playbookPath)
 
-		if playbook == nil {
+		if err != nil {
 			log.Fatalf(`%s not a valid path`, playbookPath)
 		}
 
@@ -231,7 +231,9 @@ func init() {
 
 		curr, _ := os.Getwd()
 		project := ansible.Projects.LoadFromPath(curr)
-		playbook := project.PlaybookPath(playbookPath)
+
+		//TODO unmanaged error
+		playbook, _ := project.PlaybookPath(playbookPath)
 
 		return playbook.AllTags().List(), cobra.ShellCompDirectiveDefault
 

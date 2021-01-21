@@ -1,6 +1,8 @@
 package ansible
 
 import (
+	"errors"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,13 +23,13 @@ func (p Project) PlaybookPaths() (values []string) {
 	return
 }
 
-func (p Project) PlaybookPath(path string) *Playbook {
+func (p Project) PlaybookPath(path string) (playbook *Playbook, err error) {
 	for _, playbook := range p.Playbooks {
 		if path == playbook.RelativePath() {
-			return &playbook
+			return &playbook, nil
 		}
 	}
-	return nil
+	return nil, errors.New(fmt.Sprint("No playbook found at path: ", path))
 }
 
 // TODO: Add assert on file system ( readable, permissions ...)
