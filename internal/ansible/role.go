@@ -1,6 +1,7 @@
 package ansible
 
 import (
+	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/karrick/godirwalk"
 	log "github.com/sirupsen/logrus"
@@ -46,22 +47,26 @@ func (role *Role) LoadFromPath(rootPath string) (err error) {
 			}
 
 			binData, err := ioutil.ReadFile(osPathname)
+			// IMPORTANT: Yaml and Json parser need a root element,
+			// They can't read a raw list.
+			content := fmt.Sprintf("tasks:\n%s", string(binData))
+
 			if err != nil {
-				log.Debug("Cannot read file: ", osPathname, ". Error:", err.Error())
+				log.Debug("Cannot read role file: ", osPathname, ". Error:", err.Error())
 			}
 
-			var tasks []Task
-			err = yaml.Unmarshal(binData, &tasks)
+			var roleTasks Role
+			err = yaml.Unmarshal([]byte(content), &roleTasks)
 
 			if err != nil {
 				log.Warn("Error during role parsing: ", utils.WrapRed(osPathname), ". More info in trace level.")
 				log.Trace("Err:", err.Error())
 			}
 
-			for _, task := range tasks {
+			for _, task := range roleTasks.Tasks {
 				role.Tasks = append(role.Tasks, task)
 			}
-			log.Debug("Available tags for role ", utils.WrapGrey(osPathname), " are: ", role.AllTags().List())
+			log.Trace("Available tags for role ", utils.WrapGrey(osPathname), " are: ", role.AllTags().List())
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
