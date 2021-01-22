@@ -31,53 +31,17 @@ var playCmd = &cobra.Command{
 	Short: "Run ansible-playbook command",
 	Long:  `TODO...`,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		curr, _ := os.Getwd()
-		project := ansible.Projects.LoadFromPath(curr)
-
-		rawFilters, _ := cmd.Flags().GetStringSlice("filter")
-		filters := ansible.ParseFilterArgsFromSlice(rawFilters)
-		inventories := project.FilterInventory(filters)
-
-		playbookPath, _ := cmd.Flags().GetString("playbook")
-		playbook, err := project.PlaybookPath(playbookPath)
-
-		if err != nil {
-			log.Fatalf(`%s not a valid path`, playbookPath)
-		}
-
-		tags, _ := cmd.Flags().GetStringSlice("tags")
-		limit, _ := cmd.Flags().GetStringSlice("limit")
-		vaultPassFile, _ := cmd.Flags().GetString("vault-password-file")
-
-		for _, inventory := range inventories {
-			ansiblePlaybookOptions := &ansibler.AnsiblePlaybookOptions{
-				Inventory:         inventory.RelativePath(),
-				Limit:             strings.Join(limit, ","),
-				Tags:              strings.Join(tags, ","),
-				VaultPasswordFile: vaultPassFile,
-			}
-			play := ansibler.AnsiblePlaybookCmd{
-				Playbook: playbook.RelativePath(),
-				Options:  ansiblePlaybookOptions,
-			}
-
-			ansibler.AnsibleForceColor()
-			err := play.Run()
-			if err != nil {
-				log.Fatal(err)
-			}
-
-		}
+		path, _ := os.Getwd()
+		play(cmd, args, path)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(playCmd)
 
+	// Required flags
 	playCmd.Flags().StringSliceP("filter", "", nil, `filters inventory based its on vars ex: "foo==bar,bar!=foo""`)
 	_ = playCmd.MarkFlagRequired("filter")
-
 	playCmd.Flags().StringP("playbook", "p", "", "playbook to run")
 	_ = playCmd.MarkFlagRequired("playbook")
 
@@ -85,14 +49,46 @@ func init() {
 	playCmd.Flags().StringP("vault-password-file", "", "", "vault password file")
 	playCmd.Flags().StringSliceP("limit", "l", nil, "further limit selected hosts to an additional pattern")
 	playCmd.Flags().StringSliceP("tags", "t", nil, "only run plays and tasks tagged with these values")
+}
 
-	// Here you will define your flags and configuration settings.
+func play(cmd *cobra.Command, args []string, path string) {
+	// Load project from root
+	project := ansible.Projects.LoadFromPath(path)
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// playCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// Retrieve playbook to be run
+	playbookPath, _ := cmd.Flags().GetString("playbook")
+	playbook, err := project.PlaybookPath(playbookPath)
+	if err != nil {
+		log.Fatalf(`%s not a valid path`, playbookPath)
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// playCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// Retrieve filter to select inventories
+	rawFilters, _ := cmd.Flags().GetStringSlice("filter")
+	filters := ansible.ParseFilterArgsFromSlice(rawFilters)
+	inventories := project.FilterInventory(filters)
+
+	// Retrieve ansible flags
+	tags, _ := cmd.Flags().GetStringSlice("tags")
+	limit, _ := cmd.Flags().GetStringSlice("limit")
+	vaultPassFile, _ := cmd.Flags().GetString("vault-password-file")
+
+	// Execute ansible for each inventory (sequential)
+	for _, inventory := range inventories {
+		ansiblePlaybookOptions := &ansibler.AnsiblePlaybookOptions{
+			Inventory:         inventory.RelativePath(),
+			Limit:             strings.Join(limit, ","),
+			Tags:              strings.Join(tags, ","),
+			VaultPasswordFile: vaultPassFile,
+		}
+		play := ansibler.AnsiblePlaybookCmd{
+			Playbook: playbook.RelativePath(),
+			Options:  ansiblePlaybookOptions,
+		}
+
+		ansibler.AnsibleForceColor()
+		err := play.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
