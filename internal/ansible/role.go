@@ -22,7 +22,7 @@ func (role *Role) AllTags() (tags *utils.Set) {
 	for _, task := range role.Tasks {
 		tags.Concat(task.Tags.List())
 	}
-	log.Debug("tags:::", tags.List())
+	log.Trace("tags:::", tags.List())
 	tags.Concat(role.Tags.List())
 	return
 }
@@ -56,8 +56,6 @@ func (role *Role) LoadFromPath(rootPath string) (err error) {
 
 			if err != nil {
 				log.Debug("Error reading role", osPathname, "err:", err.Error())
-			} else {
-				log.Debug("task is", tasks)
 			}
 
 			for _, task := range tasks {

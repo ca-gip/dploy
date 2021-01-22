@@ -34,7 +34,7 @@ func (playbook *Playbook) RelativePath() string {
 }
 
 // Unmarshall a playbook from file
-func (p *playbooks) unmarshallFromPath(playbookPath string) (playbook *Playbook) {
+func (p *playbooks) unmarshallFromPath(playbookPath string) (playbook *Playbook, err error) {
 	// Try to check playbook content
 	binData, err := ioutil.ReadFile(playbookPath)
 
@@ -48,7 +48,7 @@ func (p *playbooks) unmarshallFromPath(playbookPath string) (playbook *Playbook)
 	}
 	err = yaml.Unmarshal([]byte(content), &playbook)
 	if err != nil {
-		log.Debug("Skip", playbookPath, " not a playbook ", err.Error())
+		log.Debug("Skip ", playbookPath, " not a playbook ", err.Error())
 		return
 	}
 	if len(playbook.Plays) == 0 {
@@ -86,13 +86,16 @@ func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error)
 			}
 
 			// Try to check playbook content
-			playbook := Playbooks.unmarshallFromPath(osPathname)
+			playbook, err := Playbooks.unmarshallFromPath(osPathname)
+
+			if err != nil {
+				return nil
+			}
 
 			// Browse Role Tags
 			for _, play := range playbook.Plays {
 
 				allTags.Concat(play.AllTags().List())
-				log.Debug("Play tags are: ", play.Tags)
 				for _, role := range play.Roles {
 					err := role.LoadFromPath(rootPath)
 					if err != nil {
