@@ -21,7 +21,7 @@ type Inventory struct {
 	Data         *aini.InventoryData
 }
 
-func (i *Inventory) make() {
+func (i *Inventory) unmarshall() {
 	if i == nil {
 		return
 	}
@@ -63,11 +63,13 @@ func (i inventories) LoadFromPath(rootPath string) (result []*Inventory, err err
 			}
 			pathMetas := strings.Split(strings.TrimSuffix(strings.TrimPrefix(osPathname, absRoot), fmt.Sprintf("/%s", de.Name())), "/")
 
-			result = append(result, &Inventory{
+			inventory := &Inventory{
 				AbsolutePath: osPathname,
 				RootPath:     &rootPath,
 				PathTags:     pathMetas,
-			})
+			}
+			inventory.unmarshall()
+			result = append(result, inventory)
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {

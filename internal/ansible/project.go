@@ -107,8 +107,5 @@ func (projects *projects) LoadFromPath(projectDirectory string) (project Project
 	if errInventories != nil {
 		log.Fatalln("Cannot parse directory for inventories: ", errInventories.Error())
 	}
-	for _, inventory := range inventories {
-		inventory.make()
-	}
 	return
 }

@@ -21,7 +21,7 @@ func init() {
 func TestRole_ReadRoleTasks(t *testing.T) {
 
 	t.Run("with a valid path and simple data should have good tags", func(t *testing.T) {
-		err := simpleRole.LoadFromPath(projectSimpleLevelPath)
+		err := simpleRole.LoadFromPath(utils.ProjectSimpleLevelPath)
 		assert.Nil(t, err)
 		assert.NotNil(t, simpleRole.Tasks)
 		assert.NotEmpty(t, simpleRole.Tasks)
@@ -31,7 +31,7 @@ func TestRole_ReadRoleTasks(t *testing.T) {
 	})
 
 	t.Run("with a valid path and simple data should have good tags", func(t *testing.T) {
-		err := simpleRole.LoadFromPath(projectMultiLevelPath)
+		err := simpleRole.LoadFromPath(utils.ProjectMultiLevelPath)
 		assert.Nil(t, err)
 		assert.NotNil(t, simpleRole.Tasks)
 		assert.NotEmpty(t, simpleRole.Tasks)
