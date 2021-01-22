@@ -99,18 +99,17 @@ func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error)
 				for _, role := range play.Roles {
 					err := role.LoadFromPath(rootPath)
 					if err != nil {
-						log.Debug(err)
+						log.Warn("Cannot load role: ", utils.WrapRed(err.Error()))
 					} else {
-						log.Debug("  Role info", role.AllTags())
+						allTags.Concat(role.AllTags().List())
 					}
-					allTags.Concat(role.AllTags().List())
 				}
 			}
 			playbook.absolutePath = osPathname
 			playbook.rootPath = &rootPath
 
 			result = append(result, *playbook)
-			log.Debug("Available tags are :", playbook.AllTags())
+			log.Debug("Available tags for playbook", utils.WrapGrey(osPathname), " are: ", playbook.AllTags().List())
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {

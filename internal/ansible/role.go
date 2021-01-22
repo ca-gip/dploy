@@ -32,7 +32,6 @@ func (role *Role) AllTags() (tags *utils.Set) {
 // All sub parent directory added like label in the inventory
 func (role *Role) LoadFromPath(rootPath string) (err error) {
 	absRoot, err := filepath.Abs(rootPath + "/roles/" + role.Name)
-	log.Debug("reading ", role.Name, "at: ", absRoot)
 
 	if err != nil {
 		log.Debug("The role ", role.Name, "can't be read. Error:", err.Error())
@@ -55,15 +54,14 @@ func (role *Role) LoadFromPath(rootPath string) (err error) {
 			err = yaml.Unmarshal(binData, &tasks)
 
 			if err != nil {
-				log.Debug("Error reading role", osPathname, "err:", err.Error())
+				log.Warn("Error during role parsing: ", utils.WrapRed(osPathname), ". More info in trace level.")
+				log.Trace("Err:", err.Error())
 			}
 
 			for _, task := range tasks {
 				role.Tasks = append(role.Tasks, task)
 			}
-
-			log.Debug(osPathname, "tags in role tags:", role.AllTags())
-
+			log.Debug("Available tags for role ", utils.WrapGrey(osPathname), " are: ", role.AllTags().List())
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
