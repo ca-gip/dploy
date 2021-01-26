@@ -3,7 +3,6 @@ package ansible
 import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
-	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
 	"path/filepath"
 	"testing"
@@ -60,9 +59,7 @@ func TestProject_PlaybookPath(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, actual)
 
-		if diff := deep.Equal(project.Playbooks[0], *actual); len(diff) != 0 {
-			t.Error(diff)
-		}
+		utils.DeepEqual(t, project.Playbooks[0], actual)
 	})
 
 	t.Run("should return err if playbook doesn't exist", func(t *testing.T) {

@@ -19,7 +19,7 @@ const validPlaybook1 = `
 
 var expectedValidPlaybook1 = Play{
 	Hosts: "aws-node",
-	Roles: []Role{
+	Roles: []*Role{
 		{
 			Name: "add-aws-facts",
 			Tags: *utils.NewSetFromSlice("add-aws-facts"),
@@ -48,7 +48,7 @@ func Test(t *testing.T) {
 		//deep.CompareUnexportedFields = false
 		var left = Play{
 			Hosts: "aws-node",
-			Roles: []Role{
+			Roles: []*Role{
 				{
 					Name: "add-aws-facts",
 					Tags: *utils.NewSetFromSlice("left"),
@@ -59,7 +59,7 @@ func Test(t *testing.T) {
 
 		var right = Play{
 			Hosts: "aws-node",
-			Roles: []Role{
+			Roles: []*Role{
 				{
 					Name: "add-aws-facts",
 					Tags: *utils.NewSetFromSlice("left"),

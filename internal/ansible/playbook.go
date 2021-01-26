@@ -18,7 +18,7 @@ var Playbooks = playbooks{}
 type Playbook struct {
 	absolutePath string
 	rootPath     *string
-	Plays        []Play
+	Plays        []*Play
 }
 
 func (playbook *Playbook) AllTags() (tags *utils.Set) {
@@ -72,7 +72,7 @@ func (p *playbooks) unmarshallFromPath(playbookPath string, rootPath string) (pl
 
 // Gather playbook files UnmarshallPath a Parent directory
 // Using a recursive scan. All non playbook files are ignored ( not .yaml or .yml file )
-func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error) {
+func (p *playbooks) LoadFromPath(rootPath string) (result []*Playbook, err error) {
 	absRoot, err := filepath.Abs(rootPath)
 
 	if err != nil {
@@ -105,7 +105,7 @@ func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error)
 			playbook.absolutePath = osPathname
 			playbook.rootPath = &rootPath
 
-			result = append(result, *playbook)
+			result = append(result, playbook)
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {

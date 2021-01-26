@@ -14,7 +14,7 @@ var Projects = projects{}
 type Project struct {
 	Path        *string
 	Inventories []*Inventory
-	Playbooks   []Playbook
+	Playbooks   []*Playbook
 }
 
 // Returns inventory that match all the conditions
@@ -82,7 +82,7 @@ func (p Project) PlaybookPaths() (values []string) {
 func (p Project) PlaybookPath(path string) (playbook *Playbook, err error) {
 	for _, playbook := range p.Playbooks {
 		if path == playbook.RelativePath() {
-			return &playbook, nil
+			return playbook, nil
 		}
 	}
 	return nil, errors.New(fmt.Sprint("No playbook found at path: ", path))

@@ -6,7 +6,7 @@ import (
 
 type Play struct {
 	Hosts string    `yaml:"hosts"`
-	Roles []Role    `yaml:"roles"`
+	Roles []*Role   `yaml:"roles"`
 	Tags  utils.Set `yaml:"tags"`
 }
 
