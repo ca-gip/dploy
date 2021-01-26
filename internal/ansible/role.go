@@ -25,8 +25,6 @@ func (role *Role) AllTags() *utils.Set {
 	if role.Tasks != nil {
 		for _, task := range role.Tasks {
 			tags.Concat(task.Tags.List())
-			log.Debug("tasktag !", task.Tags, "role:", task.Name)
-
 		}
 	}
 	return tags

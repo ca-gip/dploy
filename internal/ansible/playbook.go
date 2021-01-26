@@ -63,9 +63,7 @@ func (p *playbooks) unmarshallFromPath(playbookPath string, rootPath string) (pl
 	for _, play := range playbook.Plays {
 		for _, role := range play.Roles {
 			role.LoadFromPath(rootPath)
-			log.Debug("task arrrrrr:", role.AllTags())
 		}
-		fmt.Println("play unmarshall tags", play.AllTags())
 	}
 	return
 }
