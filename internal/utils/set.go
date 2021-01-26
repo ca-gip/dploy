@@ -44,25 +44,10 @@ func (s *Set) Remove(value string) *Set {
 
 // Return a sorted list of values
 func (s *Set) List() (list []string) {
-	if s == nil {
-		return []string{}
-	}
-
-	if s.m == nil {
-		s.m = make(map[string]struct{})
-	}
 	for key := range s.m {
 		list = append(list, key)
 	}
 	sort.Strings(list)
-	return
-}
-
-// Return a list of values
-func (s *Set) UnsortedList() (list []string) {
-	for key := range s.m {
-		list = append(list, key)
-	}
 	return
 }
 

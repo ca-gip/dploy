@@ -73,3 +73,35 @@ func TestSet_Add(t *testing.T) {
 		DeepEqual(t, []string{"s1", "s2", "s3"}, actual.List())
 	})
 }
+
+func TestNewSetFromSlice(t *testing.T) {
+	t.Run("should return a slice ordered by key ( lexicographic )", func(t *testing.T) {
+		actual := NewSetFromSlice("z", "g", "aa")
+
+		assert.NotNil(t, actual)
+		assert.NotEmpty(t, actual.List())
+		DeepEqual(t, []string{"aa", "g", "z"}, actual.List())
+	})
+
+	t.Run("should return a slice of UNIQUE ordered key", func(t *testing.T) {
+		actual := NewSetFromSlice("c", "a", "a", "b", "b")
+
+		assert.NotNil(t, actual)
+		assert.NotEmpty(t, actual.List())
+		assert.Len(t, actual.List(), 3)
+		DeepEqual(t, []string{"a", "b", "c"}, actual.List())
+	})
+}
+
+func TestSet_Remove(t *testing.T) {
+	t.Run("should remove an existing key in slice", func(t *testing.T) {
+		actual := NewSetFromSlice("c", "a", "a", "b", "b")
+		assert.NotNil(t, actual)
+		assert.NotEmpty(t, actual.List())
+		assert.Len(t, actual.List(), 3)
+
+		actual.Remove("a")
+		assert.Len(t, actual.List(), 2)
+		DeepEqual(t, []string{"b", "c"}, actual.List())
+	})
+}
