@@ -18,22 +18,29 @@ type Role struct {
 	Tags         utils.Set `yaml:"tags"`
 }
 
-func (role *Role) AllTags() (tags *utils.Set) {
-	tags = utils.NewSet()
-	for _, task := range role.Tasks {
-		tags.Concat(task.Tags.List())
-		log.Debug("tasktag !", task.Tags, "role:", task.Name)
-
-	}
-	log.Debug("tags:::", tags.List())
+func (role *Role) AllTags() *utils.Set {
+	tags := utils.NewSet()
 	tags.Concat(role.Tags.List())
-	return
+
+	if role.Tasks != nil {
+		for _, task := range role.Tasks {
+			tags.Concat(task.Tags.List())
+			log.Debug("tasktag !", task.Tags, "role:", task.Name)
+
+		}
+	}
+	return tags
 }
 
 // Gather inventory files LoadFromPath a Parent directory
 // Using a recursive scan. All non inventory files are ignored ( not .ini file )
 // All sub parent directory added like label in the inventory
 func (role *Role) LoadFromPath(rootPath string) (err error) {
+
+	if role.Tasks == nil {
+		role.Tasks = []Task{}
+	}
+
 	absRoot, err := filepath.Abs(rootPath + "/roles/" + role.Name)
 
 	if err != nil {
@@ -66,9 +73,15 @@ func (role *Role) LoadFromPath(rootPath string) (err error) {
 				return nil
 			}
 
-			for _, task := range roleTasks.Tasks {
-				role.Tasks = append(role.Tasks, task)
+			if roleTasks.Tasks == nil {
+				return nil
 			}
+
+			resTask := []Task{}
+			for _, task := range roleTasks.Tasks {
+				resTask = append(resTask, task)
+			}
+			role.Tasks = resTask
 			log.Debug("Available tags for role ", utils.WrapGrey(osPathname), " are: ", role.AllTags().List())
 			return nil
 		},

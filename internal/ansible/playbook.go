@@ -24,7 +24,6 @@ type Playbook struct {
 func (playbook *Playbook) AllTags() (tags *utils.Set) {
 	tags = utils.NewSet()
 	for _, play := range playbook.Plays {
-		fmt.Println("tagsplayyy are", play.AllTags().List())
 		tags.Concat(play.AllTags().List())
 	}
 	return
@@ -64,7 +63,9 @@ func (p *playbooks) unmarshallFromPath(playbookPath string, rootPath string) (pl
 	for _, play := range playbook.Plays {
 		for _, role := range play.Roles {
 			role.LoadFromPath(rootPath)
+			log.Debug("task arrrrrr:", role.AllTags())
 		}
+		fmt.Println("play unmarshall tags", play.AllTags())
 	}
 	return
 }
@@ -80,7 +81,7 @@ func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error)
 	}
 
 	// Merge Play, Role and Task Tags for a playbook
-	allTags := utils.NewSet()
+	//allTags := utils.NewSet()
 
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
@@ -112,8 +113,6 @@ func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error)
 		},
 		Unsorted: true,
 	})
-	for _, play := range result {
-		allTags.Concat(play.AllTags().List())
-	}
+
 	return
 }

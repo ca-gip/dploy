@@ -7,7 +7,6 @@ replace github.com/apenella/go-ansible => github.com/clementblaise/go-ansible v0
 require (
 	github.com/apenella/go-ansible v0.6.1
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-test/deep v1.0.7
 	github.com/karrick/godirwalk v1.16.1
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351

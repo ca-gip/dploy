@@ -24,7 +24,7 @@ func TestRole_ReadRoleTasks(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, simpleRole.Tasks)
 		assert.NotEmpty(t, simpleRole.Tasks)
-		utils.DeepEqual(t, []string{"test1-tag", "test2-tag"}, simpleRole.AllTags().List())
+		utils.DeepEqual(t, []string{"role-tags-1", "test1-tag", "test2-tag"}, simpleRole.AllTags().List())
 	})
 
 	t.Run("with a valid path and simple data should have good tags", func(t *testing.T) {
@@ -33,7 +33,7 @@ func TestRole_ReadRoleTasks(t *testing.T) {
 		assert.NotNil(t, simpleRole.Tasks)
 		assert.NotEmpty(t, simpleRole.Tasks)
 
-		utils.DeepEqual(t, []string{"test-tag", "test2-tag"}, simpleRole.AllTags().List())
+		utils.DeepEqual(t, []string{"role-tags-1", "test1-tag", "test2-tag"}, simpleRole.AllTags().List())
 	})
 }
 
@@ -44,6 +44,6 @@ func TestRole_AllTags(t *testing.T) {
 		assert.NotNil(t, simpleRole.Tasks)
 		assert.NotEmpty(t, simpleRole.Tasks)
 
-		utils.DeepEqual(t, []string{"test1-tag", "test2-tag"}, simpleRole.AllTags().List())
+		utils.DeepEqual(t, []string{"role-tags-1", "test1-tag", "test2-tag"}, simpleRole.AllTags().List())
 	})
 }
