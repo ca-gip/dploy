@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/ansible"
 	"github.com/ca-gip/dploy/internal/utils"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"regexp"
 	"strings"
 )
 
 func filterCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
+	// logrus.SetLevel(logrus.PanicLevel)
+
 	key, op, value := ansible.ParseFilter(toComplete)
 
 	cobra.CompDebug(fmt.Sprintf("key:%s op:%s value:%s", key, op, value), true)
@@ -123,11 +126,13 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 }
 
 func playbookCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
+	logrus.SetLevel(logrus.PanicLevel)
 	k8s := ansible.Projects.LoadFromPath(path)
 	return k8s.PlaybookPaths(), cobra.ShellCompDirectiveDefault
 }
 
 func tagsCompletion(toComplete string, path string, playbookPath string) ([]string, cobra.ShellCompDirective) {
+	logrus.SetLevel(logrus.PanicLevel)
 	var _ = regexp.MustCompile("([\\w-.\\/]+)([,]|)")
 	if len(playbookPath) == 0 {
 		return nil, cobra.ShellCompDirectiveDefault

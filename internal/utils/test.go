@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-const testPath = "./../../test"
+const testPath = "./../../testdata"
 
 var (
 	ProjectMultiLevelPath  = fmt.Sprint(testPath, "/projectMultiLevel")

@@ -111,3 +111,7 @@ func setUpLogs(out io.Writer, level string) error {
 	logrus.SetLevel(lvl)
 	return nil
 }
+
+func isLogDebug() bool {
+	return logrus.GetLevel() == logrus.DebugLevel
+}

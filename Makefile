@@ -11,7 +11,7 @@ test: dependency
 	GOARCH=amd64 go tool cover -func coverage.out
 	GOARCH=amd64 go tool cover -html=coverage.out -o coverage.html
 
-linux: test
+linux:
 	GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build -a -ldflags '-extldflags "-static"' -v -o ./build/linux_amd64 -i $(GOPATH)/src/$(REPO)/main.go
 
 darwin: test
