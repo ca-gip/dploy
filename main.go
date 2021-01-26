@@ -10,6 +10,7 @@ import (
 
 func main() {
 
+	log.SetLevel(log.DebugLevel)
 	home, _ := os.UserHomeDir()
 	path := fmt.Sprintf("%s/%s", home, "Projects/ansible-mock")
 	k8s := ansible.Projects.LoadFromPath(path)

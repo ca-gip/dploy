@@ -13,8 +13,7 @@ type Play struct {
 func (play *Play) AllTags() (tags *utils.Set) {
 	tags = utils.NewSet()
 	for _, role := range play.Roles {
-		tags = tags.Concat(role.AllTags().List())
-
+		tags.Concat(role.AllTags().List())
 	}
 	tags.Concat(play.Tags.List())
 	return

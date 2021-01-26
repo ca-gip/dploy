@@ -44,7 +44,7 @@ func TestTask(t *testing.T) {
 			Tags: *utils.NewSetFromSlice("tasktag2"),
 		}
 
-		utils.DeepNotEqual(t, left, right)
+		utils.NotDeepEqual(t, left, right)
 	})
 
 	t.Run("with two different task name should fail", func(t *testing.T) {
@@ -58,7 +58,7 @@ func TestTask(t *testing.T) {
 			Tags: *utils.NewSetFromSlice("tasktag1"),
 		}
 
-		utils.DeepNotEqual(t, left, right)
+		utils.NotDeepEqual(t, left, right)
 	})
 
 	t.Run("without name should have tags", func(t *testing.T) {

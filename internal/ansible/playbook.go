@@ -24,6 +24,7 @@ type Playbook struct {
 func (playbook *Playbook) AllTags() (tags *utils.Set) {
 	tags = utils.NewSet()
 	for _, play := range playbook.Plays {
+		fmt.Println("tagsplayyy are", play.AllTags().List())
 		tags.Concat(play.AllTags().List())
 	}
 	return
@@ -34,7 +35,7 @@ func (playbook *Playbook) RelativePath() string {
 }
 
 // Unmarshall a playbook from file
-func (p *playbooks) unmarshallFromPath(playbookPath string) (playbook *Playbook, err error) {
+func (p *playbooks) unmarshallFromPath(playbookPath string, rootPath string) (playbook *Playbook, err error) {
 	// Try to check playbook content
 	binData, err := ioutil.ReadFile(playbookPath)
 
@@ -58,6 +59,12 @@ func (p *playbooks) unmarshallFromPath(playbookPath string) (playbook *Playbook,
 	if playbook.Plays[0].Hosts == utils.EmptyString {
 		log.Debug("No play found inside the playbook: ", playbookPath)
 		return
+	}
+
+	for _, play := range playbook.Plays {
+		for _, role := range play.Roles {
+			role.LoadFromPath(rootPath)
+		}
 	}
 	return
 }
@@ -86,30 +93,18 @@ func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error)
 			}
 
 			// Try to check playbook content
-			playbook, err := Playbooks.unmarshallFromPath(osPathname)
+			playbook, err := Playbooks.unmarshallFromPath(osPathname, rootPath)
 
 			if err != nil {
 				return nil
 			}
 
 			// Browse Role Tags
-			for _, play := range playbook.Plays {
 
-				allTags.Concat(play.AllTags().List())
-				for _, role := range play.Roles {
-					err := role.LoadFromPath(rootPath)
-					if err != nil {
-						log.Warn("Cannot load role: ", utils.WrapRed(err.Error()))
-					} else {
-						allTags.Concat(role.AllTags().List())
-					}
-				}
-			}
 			playbook.absolutePath = osPathname
 			playbook.rootPath = &rootPath
 
 			result = append(result, *playbook)
-			log.Debug("Available tags for playbook", utils.WrapGrey(osPathname), " are: ", playbook.AllTags().List())
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
@@ -117,6 +112,8 @@ func (p *playbooks) LoadFromPath(rootPath string) (result []Playbook, err error)
 		},
 		Unsorted: true,
 	})
-
+	for _, play := range result {
+		allTags.Concat(play.AllTags().List())
+	}
 	return
 }

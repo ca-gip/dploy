@@ -22,8 +22,10 @@ func (role *Role) AllTags() (tags *utils.Set) {
 	tags = utils.NewSet()
 	for _, task := range role.Tasks {
 		tags.Concat(task.Tags.List())
+		log.Debug("tasktag !", task.Tags, "role:", task.Name)
+
 	}
-	log.Trace("tags:::", tags.List())
+	log.Debug("tags:::", tags.List())
 	tags.Concat(role.Tags.List())
 	return
 }
@@ -61,12 +63,13 @@ func (role *Role) LoadFromPath(rootPath string) (err error) {
 			if err != nil {
 				log.Warn("Error during role parsing: ", utils.WrapRed(osPathname), ". More info in trace level.")
 				log.Trace("Err:", err.Error())
+				return nil
 			}
 
 			for _, task := range roleTasks.Tasks {
 				role.Tasks = append(role.Tasks, task)
 			}
-			log.Trace("Available tags for role ", utils.WrapGrey(osPathname), " are: ", role.AllTags().List())
+			log.Debug("Available tags for role ", utils.WrapGrey(osPathname), " are: ", role.AllTags().List())
 			return nil
 		},
 		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {

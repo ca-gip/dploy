@@ -2,7 +2,6 @@ package ansible
 
 import (
 	"github.com/ca-gip/dploy/internal/utils"
-	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"
@@ -40,19 +39,9 @@ func Test(t *testing.T) {
 		assert.NotEmpty(t, plays)
 
 		//deep.CompareUnexportedFields = false
-		if diff := deep.Equal(plays[0], expectedValidPlaybook1); diff != nil {
-			t.Error(diff)
-		}
-		assert.Equal(t, plays[0], expectedValidPlaybook1)
+		utils.DeepEqual(t, plays[0], expectedValidPlaybook1)
+		utils.DeepEqual(t, plays[0].Roles[0].Tags.List(), expectedValidPlaybook1.Roles[0].Tags.List())
 
-		// Not so deep ?
-		if diff := deep.Equal(plays[0].Roles[0].Tags.List(), expectedValidPlaybook1.Roles[0].Tags.List()); diff != nil {
-			t.Error(diff)
-		}
-
-		if diff := deep.Equal(plays[0].Roles[0].Tags.List(), expectedValidPlaybook1.Roles[0].Tags.List()); diff != nil {
-			t.Error(diff)
-		}
 	})
 
 	t.Run("with two different play should be different deep.Equals", func(t *testing.T) {
@@ -78,10 +67,20 @@ func Test(t *testing.T) {
 			},
 			Tags: *utils.NewSetFromSlice("right", "Right"),
 		}
-		// Not so deep ?
-		if diff := deep.Equal(left, right); len(diff) != 0 {
-			t.Error(diff)
-		}
+		utils.NotDeepEqual(t, left, right)
+	})
+
+	t.Run("with a task and task tag should return all task ( play, role, task's tags)", func(t *testing.T) {
+
+		playbooks, err := Playbooks.LoadFromPath(utils.ProjectMultiLevelPath)
+		assert.Nil(t, err)
+		assert.NotNil(t, playbooks)
+		assert.Len(t, playbooks, 1)
+		assert.NotEmpty(t, playbooks)
+		assert.NotEmpty(t, playbooks[0].AllTags())
+		assert.Contains(t, playbooks[0].AllTags().List(), "playtag1")
+		assert.Contains(t, playbooks[0].AllTags().List(), "test1-tag")
+
 	})
 
 }
