@@ -18,7 +18,7 @@ func main() {
 
 	tpl := ansible.Command{
 		Inventory:         k8s.Inventories,
-		Playbook:          &k8s.Playbooks[0],
+		Playbook:          k8s.Playbooks[0],
 		Tags:              []string{"tag1", "tag2"},
 		Limit:             []string{"limit1,limit2"},
 		SkipTags:          []string{"testt"},
