@@ -1,6 +1,7 @@
 package ansible
 
 import (
+	"errors"
 	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/karrick/godirwalk"
@@ -44,20 +45,15 @@ func (p *playbooks) unmarshallFromPath(playbookPath string, rootPath string) (pl
 
 	if err != nil {
 		log.Error("Cannot read playbook", playbookPath, ". Error: ", err.Error())
-		return
+		return nil, err
 	}
 	err = yaml.Unmarshal([]byte(content), &playbook)
 	if err != nil {
 		log.Debug("Skip ", playbookPath, " not a playbook ", err.Error())
-		return
+		return nil, err
 	}
-	if len(playbook.Plays) == 0 {
-		log.Debug("No play found inside the playbook: ", playbookPath)
-		return
-	}
-	if playbook.Plays[0].Hosts == utils.EmptyString {
-		log.Debug("No play found inside the playbook: ", playbookPath)
-		return
+	if len(playbook.Plays) == 0 || playbook.Plays[0].Hosts == utils.EmptyString {
+		return nil, errors.New(fmt.Sprint("No play found inside the playbook: ", playbookPath))
 	}
 
 	for _, play := range playbook.Plays {

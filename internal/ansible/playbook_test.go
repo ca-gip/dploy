@@ -1,7 +1,9 @@
 package ansible
 
 import (
+	"fmt"
 	"github.com/ca-gip/dploy/internal/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"
@@ -16,6 +18,10 @@ const validPlaybook1 = `
     - setup:
   tags: always,alwaystest
 `
+
+func init() {
+	log.SetLevel(log.DebugLevel)
+}
 
 var expectedValidPlaybook1 = Play{
 	Hosts: "aws-node",
@@ -80,7 +86,33 @@ func Test(t *testing.T) {
 		assert.NotEmpty(t, playbooks[0].AllTags())
 		assert.Contains(t, playbooks[0].AllTags().List(), "playtag1")
 		assert.Contains(t, playbooks[0].AllTags().List(), "test1-tag")
+	})
 
+	t.Run("unmarshalling with a non existing playbook should return error", func(t *testing.T) {
+		playbook, err := Playbooks.unmarshallFromPath("nonexistingplaybook.yml", utils.ProjectMultiLevelPath)
+		assert.Nil(t, playbook)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("unmarshalling with a non yml file should return error", func(t *testing.T) {
+		inventoryFilepath := fmt.Sprint(utils.ProjectMultiLevelPath, "/inventories/openstack/customer1/hosts.ini")
+		playbook, err := Playbooks.unmarshallFromPath(inventoryFilepath, utils.ProjectMultiLevelPath)
+		assert.Nil(t, playbook)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("unmarshalling with a non playbook file should return error", func(t *testing.T) {
+		roleFilepath := fmt.Sprint(utils.ProjectMultiLevelPath, "/roles/existing-role-1/tasks/main.yml")
+		playbook, err := Playbooks.unmarshallFromPath(roleFilepath, utils.ProjectMultiLevelPath)
+		assert.Nil(t, playbook)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("unmarshalling with a non valid path should return error", func(t *testing.T) {
+		roleFilepath := fmt.Sprint(utils.ProjectMultiLevelPath, "../../../../../../../../main.yml")
+		playbook, err := Playbooks.unmarshallFromPath(roleFilepath, utils.ProjectMultiLevelPath)
+		assert.Nil(t, playbook)
+		assert.NotNil(t, err)
 	})
 
 }

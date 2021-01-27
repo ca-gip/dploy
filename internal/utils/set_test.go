@@ -105,3 +105,14 @@ func TestSet_Remove(t *testing.T) {
 		DeepEqual(t, []string{"b", "c"}, actual.List())
 	})
 }
+
+func TestSet_Contains(t *testing.T) {
+	t.Run("should contain an existing key", func(t *testing.T) {
+		actual := NewSetFromSlice("a", "b", "c")
+		assert.NotNil(t, actual)
+		assert.NotEmpty(t, actual.List())
+		assert.Len(t, actual.List(), 3)
+
+		assert.True(t, actual.Contains("a"), true)
+	})
+}
