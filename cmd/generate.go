@@ -38,7 +38,7 @@ func init() {
 	rootCmd.AddCommand(generateCmd)
 
 	// Required flags
-	generateCmd.Flags().StringSliceP("filter", utils.EmptyString, nil, `filters inventory based its on vars ex: "foo==bar,bar!=fooutils.EmptyString`)
+	generateCmd.Flags().StringSliceP("filter", utils.EmptyString, nil, `filters inventory based its on vars ex: "foo==bar,bar!=foo""`)
 	_ = generateCmd.MarkFlagRequired("filter")
 	generateCmd.Flags().StringP("playbook", "p", utils.EmptyString, "playbook to run")
 	_ = generateCmd.MarkFlagRequired("playbook")

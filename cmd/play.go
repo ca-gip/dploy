@@ -41,7 +41,7 @@ func init() {
 	rootCmd.AddCommand(playCmd)
 
 	// Required flags
-	playCmd.Flags().StringSliceP("filter", utils.EmptyString, nil, `filters inventory based its on vars ex: "foo==bar,bar!=fooutils.EmptyString`)
+	playCmd.Flags().StringSliceP("filter", utils.EmptyString, nil, `filters inventory based its on vars ex: "foo==bar,bar!=""`)
 	_ = playCmd.MarkFlagRequired("filter")
 	playCmd.Flags().StringP("playbook", "p", utils.EmptyString, "playbook to run")
 	_ = playCmd.MarkFlagRequired("playbook")
