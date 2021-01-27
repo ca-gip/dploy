@@ -64,7 +64,7 @@ func TestFilterCompletion(t *testing.T) {
 		"multi-level with 'customer%=' should return with nothing": {
 			toComplete: "customer%=",
 			path:       ProjectMultiLevelPath,
-			expect:     []string{},
+			expect:     nil,
 		},
 	}
 
@@ -77,6 +77,7 @@ func TestFilterCompletion(t *testing.T) {
 
 }
 
+//
 //func TestTagsCompletion(t *testing.T) {
 //	testCases := map[string]struct {
 //		toComplete string
@@ -105,7 +106,7 @@ func TestFilterCompletion(t *testing.T) {
 //	}
 //
 //}
-
+//
 //func TestPlaybookCompletion(t *testing.T) {
 //	testCases := map[string]struct {
 //		toComplete string
