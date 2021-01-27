@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -61,7 +62,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.dploy.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", utils.EmptyString, "config file (default is $HOME/.dploy.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "verbosity", "v", logrus.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic")
 
 	// Cobra also supports local flags, which will only run
@@ -77,7 +78,7 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
+	if cfgFile != utils.EmptyString {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {

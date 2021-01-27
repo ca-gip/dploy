@@ -1,6 +1,7 @@
 package ansible
 
 import (
+	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -58,7 +59,7 @@ func TestEval(t *testing.T) {
 	}{
 		"foo equal foo should pass": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    Equal,
 				Value: "foo",
 			},
@@ -67,7 +68,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo equal bar should fail": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    Equal,
 				Value: "foo",
 			},
@@ -76,7 +77,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo notequal bar should pass": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    NotEqual,
 				Value: "foo",
 			},
@@ -85,7 +86,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo notequal foo should fail": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    NotEqual,
 				Value: "foo",
 			},
@@ -94,7 +95,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo endwith oo should pass": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    EndWith,
 				Value: "foo",
 			},
@@ -103,7 +104,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo endwith fo should fail": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    EndWith,
 				Value: "foo",
 			},
@@ -112,7 +113,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo contains o should pass": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    Contains,
 				Value: "foo",
 			},
@@ -121,7 +122,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo contains z should fail": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    Contains,
 				Value: "foo",
 			},
@@ -130,7 +131,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo StartWith fo should pass": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    StartWith,
 				Value: "foo",
 			},
@@ -139,7 +140,7 @@ func TestEval(t *testing.T) {
 		},
 		"foo StartWith oo should fail": {
 			given: Filter{
-				Key:   "",
+				Key:   utils.EmptyString,
 				Op:    StartWith,
 				Value: "foo",
 			},

@@ -1,6 +1,7 @@
 package ansible
 
 import (
+	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/relex/aini"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -23,7 +24,7 @@ func TestProject_InventoryKeys(t *testing.T) {
 		"single inventory with one var should return one key ": {
 			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
-					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": ""}}},
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": utils.EmptyString}}},
 				},
 			}},
 			expect: []string{"key1"},
@@ -31,7 +32,7 @@ func TestProject_InventoryKeys(t *testing.T) {
 		"single inventory with two var should return two key ": {
 			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
-					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": "", "key2": ""}}},
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": utils.EmptyString, "key2": utils.EmptyString}}},
 				},
 			}},
 			expect: []string{"key1", "key2"},
@@ -39,20 +40,20 @@ func TestProject_InventoryKeys(t *testing.T) {
 		"two inventories with same var should return one key ": {
 			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
-					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": ""}}},
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": utils.EmptyString}}},
 				},
 			}, {Data: &aini.InventoryData{
-				Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": ""}}},
+				Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": utils.EmptyString}}},
 			}}},
 			expect: []string{"key1"},
 		},
 		"two inventories with different var should return two key ": {
 			inventories: []*Inventory{{
 				Data: &aini.InventoryData{
-					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": ""}}},
+					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": utils.EmptyString}}},
 				},
 			}, {Data: &aini.InventoryData{
-				Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key2": ""}}},
+				Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key2": utils.EmptyString}}},
 			}}},
 			expect: []string{"key1", "key2"},
 		},
@@ -136,7 +137,7 @@ func TestProject_InventoryValues(t *testing.T) {
 					Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key1": "value1"}}},
 				},
 			}, {Data: &aini.InventoryData{
-				Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key2": ""}}},
+				Groups: map[string]*aini.Group{"all": {Vars: map[string]string{"key2": utils.EmptyString}}},
 			}}},
 			given:  "key1",
 			expect: []string{"value1"},

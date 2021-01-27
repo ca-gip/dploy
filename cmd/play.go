@@ -18,6 +18,7 @@ package cmd
 import (
 	ansibler "github.com/apenella/go-ansible"
 	"github.com/ca-gip/dploy/internal/ansible"
+	"github.com/ca-gip/dploy/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
@@ -40,13 +41,13 @@ func init() {
 	rootCmd.AddCommand(playCmd)
 
 	// Required flags
-	playCmd.Flags().StringSliceP("filter", "", nil, `filters inventory based its on vars ex: "foo==bar,bar!=foo""`)
+	playCmd.Flags().StringSliceP("filter", utils.EmptyString, nil, `filters inventory based its on vars ex: "foo==bar,bar!=fooutils.EmptyString`)
 	_ = playCmd.MarkFlagRequired("filter")
-	playCmd.Flags().StringP("playbook", "p", "", "playbook to run")
+	playCmd.Flags().StringP("playbook", "p", utils.EmptyString, "playbook to run")
 	_ = playCmd.MarkFlagRequired("playbook")
 
 	// Ansible params
-	playCmd.Flags().StringP("vault-password-file", "", "", "vault password file")
+	playCmd.Flags().StringP("vault-password-file", utils.EmptyString, utils.EmptyString, "vault password file")
 	playCmd.Flags().StringSliceP("limit", "l", nil, "further limit selected hosts to an additional pattern")
 	playCmd.Flags().StringSliceP("tags", "t", nil, "only run plays and tasks tagged with these values")
 }

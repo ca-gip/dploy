@@ -75,7 +75,7 @@ func (role *Role) LoadFromPath(rootPath string) (err error) {
 				return nil
 			}
 
-			resTask := []Task{}
+			var resTask []Task
 			for _, task := range roleTasks.Tasks {
 				resTask = append(resTask, task)
 			}

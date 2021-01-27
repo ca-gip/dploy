@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"github.com/ca-gip/dploy/internal/ansible"
+	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -37,15 +38,15 @@ func init() {
 	rootCmd.AddCommand(generateCmd)
 
 	// Required flags
-	generateCmd.Flags().StringSliceP("filter", "", nil, `filters inventory based its on vars ex: "foo==bar,bar!=foo""`)
+	generateCmd.Flags().StringSliceP("filter", utils.EmptyString, nil, `filters inventory based its on vars ex: "foo==bar,bar!=fooutils.EmptyString`)
 	_ = generateCmd.MarkFlagRequired("filter")
-	generateCmd.Flags().StringP("playbook", "p", "", "playbook to run")
+	generateCmd.Flags().StringP("playbook", "p", utils.EmptyString, "playbook to run")
 	_ = generateCmd.MarkFlagRequired("playbook")
 
 	// Ansible params
-	generateCmd.Flags().BoolP("ask-vault-password", "", false, "ask for vault password")
-	generateCmd.Flags().StringP("vault-password-file", "", "", "vault password file")
-	generateCmd.Flags().StringSliceP("skip-tags", "", nil, "only run plays and tasks whose tags do not match these values")
+	generateCmd.Flags().BoolP("ask-vault-password", utils.EmptyString, false, "ask for vault password")
+	generateCmd.Flags().StringP("vault-password-file", utils.EmptyString, utils.EmptyString, "vault password file")
+	generateCmd.Flags().StringSliceP("skip-tags", utils.EmptyString, nil, "only run plays and tasks whose tags do not match these values")
 	generateCmd.Flags().BoolP("check", "C", false, "don't make any changes; instead, try to predict some of the changes that may occur")
 	generateCmd.Flags().BoolP("diff", "D", false, "when changing (small) files and templates, show the differences in those files; works great with --check")
 	generateCmd.Flags().StringSliceP("limit", "l", nil, "further limit selected hosts to an additional pattern")

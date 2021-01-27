@@ -64,7 +64,7 @@ func (p Project) InventoryValues(key string) (values []string) {
 	valueSet := utils.NewSet()
 	for _, inventory := range p.Inventories {
 		if inventory.Data != nil {
-			if value := inventory.Data.Groups["all"].Vars[key]; value != "" {
+			if value := inventory.Data.Groups["all"].Vars[key]; value != utils.EmptyString {
 				valueSet.Add(value)
 			}
 		}

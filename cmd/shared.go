@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/ca-gip/dploy/internal/ansible"
+	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/spf13/cobra"
 	"regexp"
 	"strings"
@@ -17,12 +18,12 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 
 	availableKeys := k8s.InventoryKeys()
 
-	blank := key == "" && op == "" && value == ""
+	blank := key == utils.EmptyString && op == utils.EmptyString && value == utils.EmptyString
 	if blank {
 		return availableKeys, cobra.ShellCompDirectiveDefault
 	}
 
-	writingKey := key != "" && op == "" && value == ""
+	writingKey := key != utils.EmptyString && op == utils.EmptyString && value == utils.EmptyString
 	if writingKey {
 		var keysCompletion []string
 		for _, availableKey := range availableKeys {
@@ -43,7 +44,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 		return keysCompletion, cobra.ShellCompDirectiveDefault
 	}
 
-	writingOp := key != "" && op != "" && value == ""
+	writingOp := key != utils.EmptyString && op != utils.EmptyString && value == utils.EmptyString
 	if writingOp {
 		var prefixedOperator []string
 
@@ -56,7 +57,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 
 				for _, availableValue := range availableValues {
 
-					if availableValue != "" {
+					if availableValue != utils.EmptyString {
 						prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, op, availableValue))
 					}
 
@@ -81,7 +82,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 
 			for _, availableValue := range availableValues {
 
-				if availableValue != "" {
+				if availableValue != utils.EmptyString {
 					prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, foundOp, availableValue))
 				}
 
@@ -93,7 +94,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 		return prefixedOperator, cobra.ShellCompDirectiveDefault
 	}
 
-	writingValue := key != "" && op != "" && value != ""
+	writingValue := key != utils.EmptyString && op != utils.EmptyString && value != utils.EmptyString
 	if writingValue {
 		for _, allowedOperator := range ansible.AllowedOperators {
 
@@ -103,7 +104,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 				var prefixedValues []string
 
 				for _, availableValue := range availableValues {
-					if availableValue != "" && strings.HasPrefix(availableValue, value) {
+					if availableValue != utils.EmptyString && strings.HasPrefix(availableValue, value) {
 						prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, op, availableValue))
 					}
 
