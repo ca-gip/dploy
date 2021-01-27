@@ -25,8 +25,8 @@ func WrapRed(msg ...string) string {
 
 func wrapLog(color string, msg ...string) string {
 	if isTerminal() {
-		return fmt.Sprintf("\033[1;"+color+"m%v\033[0m", strings.Join(msg, EmptyString))
+		return fmt.Sprint("\033[1;", color, "m", strings.Join(msg, EmptyString), "\033[0m")
 	} else {
-		return fmt.Sprintf(strings.Join(msg, EmptyString))
+		return fmt.Sprint(strings.Join(msg, EmptyString))
 	}
 }
