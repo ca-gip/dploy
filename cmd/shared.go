@@ -134,13 +134,18 @@ func playbookCompletion(toComplete string, path string) ([]string, cobra.ShellCo
 func tagsCompletion(toComplete string, path string, playbookPath string) ([]string, cobra.ShellCompDirective) {
 	logrus.SetLevel(logrus.PanicLevel)
 	var _ = regexp.MustCompile("([\\w-.\\/]+)([,]|)")
+
 	if len(playbookPath) == 0 {
 		return nil, cobra.ShellCompDirectiveDefault
 	}
 	project := ansible.Projects.LoadFromPath(path)
 
-	//TODO unmanaged error
-	playbook, _ := project.PlaybookPath(playbookPath)
+	playbook, err := project.PlaybookPath(playbookPath)
+
+	if err != nil {
+		cobra.CompDebug(err.Error(), true)
+		return nil, cobra.ShellCompDirectiveDefault
+	}
 
 	return playbook.AllTags().List(), cobra.ShellCompDirectiveDefault
 }
