@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func extractMultitpleCompletion(toComplete string) (remainder string, current string) {
+func extractMultipleCompletion(toComplete string) (remainder string, current string) {
 	toCompletes := strings.Split(toComplete, ",")
 
 	if len(toCompletes) == 1 {
@@ -25,7 +25,7 @@ func extractMultitpleCompletion(toComplete string) (remainder string, current st
 func filterCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
 	logrus.SetLevel(logrus.PanicLevel)
 
-	remainder, current := extractMultitpleCompletion(toComplete)
+	remainder, current := extractMultipleCompletion(toComplete)
 	cobra.CompDebug(fmt.Sprintf("extract muitple: remainder:%s current:%s\n", remainder, current), true)
 
 	key, op, value := ansible.ParseFilter(current)
@@ -34,107 +34,72 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 	k8s := ansible.Projects.LoadFromPath(path)
 	availableKeys := k8s.InventoryKeys()
 
+	// Blank
 	blank := key == utils.EmptyString && op == utils.EmptyString && value == utils.EmptyString
 	if blank {
+		cobra.CompDebug("blank case", true)
 		return utils.AppendPrefixOnSlice(remainder, availableKeys), cobra.ShellCompDirectiveDefault
 	}
 
+	// Writing Key
 	writingKey := key != utils.EmptyString && op == utils.EmptyString && value == utils.EmptyString
 	if writingKey {
-		var keysCompletion []string
-		for _, availableKey := range availableKeys {
-			if strings.HasPrefix(availableKey, key) {
-				keysCompletion = append(keysCompletion, availableKey)
-			}
+		cobra.CompDebug("writingKey case", true)
+		keyMatches := utils.Filter(availableKeys, func(s string) bool {
+			return strings.HasPrefix(s, key)
+		})
+		// Key is known complete for operators
+		if len(keyMatches) == 1 {
+			key := keyMatches[0]
+			keyOperatorCompletion := utils.AppendPrefixOnSlice(key, ansible.AllowedOperators)
+			return utils.AppendPrefixOnSlice(remainder, keyOperatorCompletion), cobra.ShellCompDirectiveDefault
 		}
 
-		if len(keysCompletion) == 1 {
-			var prefixedOperator []string
-
-			for _, allowedOperator := range ansible.AllowedOperators {
-				prefixedOperator = append(prefixedOperator, fmt.Sprintf("%s%s", keysCompletion[0], allowedOperator))
-			}
-			return prefixedOperator, cobra.ShellCompDirectiveDefault
-		}
-
-		return keysCompletion, cobra.ShellCompDirectiveDefault
+		return utils.AppendPrefixOnSlice(remainder, keyMatches), cobra.ShellCompDirectiveDefault
 	}
 
+	// Writing Operator
 	writingOp := key != utils.EmptyString && op != utils.EmptyString && value == utils.EmptyString
 	if writingOp {
-		var prefixedOperator []string
+		cobra.CompDebug("writingOp case", true)
+		opMatches := utils.Filter(ansible.AllowedOperators, func(s string) bool {
+			return strings.HasPrefix(s, op)
+		})
 
-		for _, allowedOperator := range ansible.AllowedOperators {
-
-			if op == allowedOperator {
-				availableValues := k8s.InventoryValues(key)
-
-				var prefixedValues []string
-
-				for _, availableValue := range availableValues {
-
-					if availableValue != utils.EmptyString {
-						prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, op, availableValue))
-					}
-
-				}
-
-				return prefixedValues, cobra.ShellCompDirectiveDefault
-
-			}
-
-			if allowedOperator[0] == op[0] {
-				prefixedOperator = append(prefixedOperator, fmt.Sprintf("%s%s", key, allowedOperator))
-			}
-
+		// No matches return empty slice
+		if len(opMatches) == 0 {
+			return []string{}, cobra.ShellCompDirectiveDefault
 		}
 
-		if len(prefixedOperator) == 1 {
-			availableValues := k8s.InventoryValues(key)
-
-			_, foundOp, _ := ansible.ParseFilter(prefixedOperator[0])
-
-			var prefixedValues []string
-
-			for _, availableValue := range availableValues {
-
-				if availableValue != utils.EmptyString {
-					prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, foundOp, availableValue))
-				}
-
-			}
-
-			return prefixedValues, cobra.ShellCompDirectiveDefault
+		// Match Op complete value
+		if len(opMatches) == 1 {
+			op := opMatches[0]
+			// Add op, key and remainder
+			return utils.AppendPrefixOnSlice(remainder, utils.AppendPrefixOnSlice(key, utils.AppendPrefixOnSlice(op, k8s.InventoryValues(key)))), cobra.ShellCompDirectiveDefault
 		}
 
-		return prefixedOperator, cobra.ShellCompDirectiveDefault
+		// Multiple Op possible
+		return utils.AppendPrefixOnSlice(remainder, utils.AppendPrefixOnSlice(key, opMatches)), cobra.ShellCompDirectiveDefault
 	}
 
+	// Writing value
 	writingValue := key != utils.EmptyString && op != utils.EmptyString && value != utils.EmptyString
 	if writingValue {
-		for _, allowedOperator := range ansible.AllowedOperators {
+		cobra.CompDebug("writingValue case", true)
+		matches := utils.Filter(k8s.InventoryValues(key), func(s string) bool {
+			return strings.HasPrefix(s, value)
+		})
 
-			if op == allowedOperator {
-				availableValues := k8s.InventoryValues(key)
-
-				var prefixedValues []string
-
-				for _, availableValue := range availableValues {
-					if availableValue != utils.EmptyString && strings.HasPrefix(availableValue, value) {
-						prefixedValues = append(prefixedValues, fmt.Sprintf("%s%s%s", key, op, availableValue))
-					}
-
-				}
-
-				return prefixedValues, cobra.ShellCompDirectiveDefault
-
-			}
-
+		// No matches return empty slice
+		if len(matches) == 0 {
+			return []string{}, cobra.ShellCompDirectiveDefault
 		}
-		return []string{}, cobra.ShellCompDirectiveDefault
+
+		return utils.AppendPrefixOnSlice(remainder, utils.AppendPrefixOnSlice(key, utils.AppendPrefixOnSlice(op, matches))), cobra.ShellCompDirectiveDefault
 
 	}
 
+	cobra.CompDebug("no case match", true)
 	return k8s.InventoryKeys(), cobra.ShellCompDirectiveDefault
 }
 

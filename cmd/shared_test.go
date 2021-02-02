@@ -45,7 +45,7 @@ func TestExtractMultitpleCompletion(t *testing.T) {
 
 	for testName, testCase := range testCases {
 		t.Run(testName, func(t *testing.T) {
-			actualRemainder, actualCurrent := extractMultitpleCompletion(testCase.toComplete)
+			actualRemainder, actualCurrent := extractMultipleCompletion(testCase.toComplete)
 			assert.Equal(t, testCase.expectsRemainder, actualRemainder)
 			assert.Equal(t, testCase.expectsCurrent, actualCurrent)
 		})
@@ -107,7 +107,7 @@ func TestFilterCompletion(t *testing.T) {
 		"multi-level with 'customer%=' should return with nothing": {
 			toComplete: "customer%=",
 			path:       ProjectMultiLevelPath,
-			expect:     nil,
+			expect:     []string{},
 		},
 		"multi-level with 'customer==customer1,' should return to complete": {
 			toComplete: "customer==customer1",
@@ -117,7 +117,7 @@ func TestFilterCompletion(t *testing.T) {
 		"multi-level with 'customer==customer1,' should return all vars": {
 			toComplete: "customer==customer1,",
 			path:       ProjectMultiLevelPath,
-			expect:     []string{"customer", "env", "os", "platform"},
+			expect:     []string{"customer==customer1,customer", "customer==customer1,env", "customer==customer1,os", "customer==customer1,platform"},
 		},
 	}
 
