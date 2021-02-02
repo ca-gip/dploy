@@ -10,20 +10,33 @@ import (
 	"strings"
 )
 
+func extractMultitpleCompletion(toComplete string) (remainder string, current string) {
+	toCompletes := strings.Split(toComplete, ",")
+
+	if len(toCompletes) == 1 {
+		return utils.EmptyString, toCompletes[0]
+	}
+
+	remainder = fmt.Sprintf("%s%s", strings.Join(toCompletes[:len(toCompletes)-1], ","), ",")
+	current = toCompletes[len(toCompletes)-1]
+	return
+}
+
 func filterCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
-	// logrus.SetLevel(logrus.PanicLevel)
+	logrus.SetLevel(logrus.PanicLevel)
 
-	key, op, value := ansible.ParseFilter(toComplete)
+	remainder, current := extractMultitpleCompletion(toComplete)
+	cobra.CompDebug(fmt.Sprintf("extract muitple: remainder:%s current:%s\n", remainder, current), true)
 
-	cobra.CompDebug(fmt.Sprintf("key:%s op:%s value:%s", key, op, value), true)
+	key, op, value := ansible.ParseFilter(current)
+	cobra.CompDebug(fmt.Sprintf("parse filter: key:%s op:%s value:%s\n", key, op, value), true)
 
 	k8s := ansible.Projects.LoadFromPath(path)
-
 	availableKeys := k8s.InventoryKeys()
 
 	blank := key == utils.EmptyString && op == utils.EmptyString && value == utils.EmptyString
 	if blank {
-		return availableKeys, cobra.ShellCompDirectiveDefault
+		return utils.AppendPrefixOnSlice(remainder, availableKeys), cobra.ShellCompDirectiveDefault
 	}
 
 	writingKey := key != utils.EmptyString && op == utils.EmptyString && value == utils.EmptyString
