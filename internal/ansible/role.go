@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+var AnsibleValidRoleSubFolders = utils.NewSetFromSlice("tasks", "meta")
+
 type Role struct {
 	AbsolutePath string
 	Name         string    `yaml:"role"`
@@ -48,6 +50,10 @@ func (role *Role) LoadFromPath(rootPath string) (err error) {
 
 	err = godirwalk.Walk(absRoot, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
+
+			if de.IsDir() && !AnsibleValidRoleSubFolders.Contains(de.Name()) {
+				return nil
+			}
 
 			if !strings.Contains(filepath.Base(osPathname), ".yml") {
 				return nil
