@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+var EmptyCompletion []string
+
 func extractMultipleCompletion(toComplete string) (remainder string, current string) {
 	toCompletes := strings.Split(toComplete, ",")
 
@@ -24,7 +26,6 @@ func extractMultipleCompletion(toComplete string) (remainder string, current str
 
 func filterCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
 	logrus.SetLevel(logrus.PanicLevel)
-	var EmptyCompletion []string
 
 	remainder, current := extractMultipleCompletion(toComplete)
 	cobra.CompDebug(fmt.Sprintf("extract muitple: remainder:%s current:%s\n", remainder, current), true)
@@ -124,7 +125,7 @@ func tagsCompletion(toComplete string, path string, playbookPath string) ([]stri
 
 	if err != nil {
 		cobra.CompDebug(err.Error(), true)
-		return nil, cobra.ShellCompDirectiveDefault
+		return EmptyCompletion, cobra.ShellCompDirectiveDefault
 	}
 
 	return playbook.AllTags().List(), cobra.ShellCompDirectiveDefault

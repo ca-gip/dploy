@@ -155,8 +155,7 @@ func TestTagsCompletion(t *testing.T) {
 		path:       ProjectMultiLevelPath,
 		playbook:   "test.yml",
 		expect:     []string{"existing-role", "playtag1", "role-1", "test1-tag", "test2-tag"},
-	},
-	}
+	}}
 
 	for testName, testCase := range testCases {
 		t.Run(testName, func(t *testing.T) {
