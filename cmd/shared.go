@@ -24,6 +24,7 @@ func extractMultipleCompletion(toComplete string) (remainder string, current str
 
 func filterCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
 	logrus.SetLevel(logrus.PanicLevel)
+	var EmptyCompletion []string
 
 	remainder, current := extractMultipleCompletion(toComplete)
 	cobra.CompDebug(fmt.Sprintf("extract muitple: remainder:%s current:%s\n", remainder, current), true)
@@ -55,6 +56,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 			return utils.AppendPrefixOnSlice(remainder, keyOperatorCompletion), cobra.ShellCompDirectiveDefault
 		}
 
+		// Multiple key matched
 		return utils.AppendPrefixOnSlice(remainder, keyMatches), cobra.ShellCompDirectiveDefault
 	}
 
@@ -68,7 +70,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 
 		// No matches return empty slice
 		if len(opMatches) == 0 {
-			return []string{}, cobra.ShellCompDirectiveDefault
+			return EmptyCompletion, cobra.ShellCompDirectiveDefault
 		}
 
 		// Match Op complete value
@@ -92,7 +94,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 
 		// No matches return empty slice
 		if len(matches) == 0 {
-			return []string{}, cobra.ShellCompDirectiveDefault
+			return EmptyCompletion, cobra.ShellCompDirectiveDefault
 		}
 
 		return utils.AppendPrefixOnSlice(remainder, utils.AppendPrefixOnSlice(key, utils.AppendPrefixOnSlice(op, matches))), cobra.ShellCompDirectiveDefault
@@ -100,7 +102,7 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 	}
 
 	cobra.CompDebug("no case match", true)
-	return k8s.InventoryKeys(), cobra.ShellCompDirectiveDefault
+	return EmptyCompletion, cobra.ShellCompDirectiveDefault
 }
 
 func playbookCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
