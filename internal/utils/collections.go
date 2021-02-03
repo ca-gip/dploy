@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 // Index returns the first index of the target string `t`, or
 // -1 if no match is found.
 func Index(vs []string, t string) int {
@@ -73,4 +75,18 @@ func MapHasAllTrue(a map[string]bool) bool {
 	}
 
 	return true
+}
+
+func AppendPrefixOnSlice(prefix string, slice []string) (result []string) {
+	for _, s := range slice {
+		result = append(result, fmt.Sprintf("%s%s", prefix, s))
+	}
+	return
+}
+
+func AppendSuffixOnSlice(suffix string, slice []string) (result []string) {
+	for _, s := range slice {
+		result = append(result, fmt.Sprintf("%s%s", s, suffix))
+	}
+	return
 }

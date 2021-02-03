@@ -103,6 +103,10 @@ func initConfig() {
 
 //setUpLogs set the log output ans the log level
 func setUpLogs(out io.Writer, level string) error {
+	// Force colors (required for darwin)
+	formatter := new(logrus.TextFormatter)
+	formatter.ForceColors = true
+	// Set loglevel
 	logrus.SetOutput(out)
 	lvl, err := logrus.ParseLevel(level)
 	if err != nil {
