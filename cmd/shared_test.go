@@ -73,10 +73,10 @@ func TestFilterCompletion(t *testing.T) {
 			path:       ProjectMultiLevelPath,
 			expect:     []string{"customer==", "customer!=", "customer^=", "customer~=", "customer$="},
 		},
-		"multi-level with 'p' should return all vars": {
+		"multi-level with 'p' should return two key": {
 			toComplete: "p",
 			path:       ProjectMultiLevelPath,
-			expect:     []string{"platform==", "platform!=", "platform^=", "platform~=", "platform$="},
+			expect:     []string{"platform", "priority"},
 		},
 		"multi-level with 'customer=' should return with values": {
 			toComplete: "customer=",
