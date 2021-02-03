@@ -61,7 +61,7 @@ func TestFilterCompletion(t *testing.T) {
 	}{"multi-level with black should return all vars": {
 		toComplete: "",
 		path:       ProjectMultiLevelPath,
-		expect:     []string{"customer", "env", "os", "platform"},
+		expect:     []string{"customer", "env", "os", "platform", "priority"},
 	},
 		"multi-level with 'c' should should return customer with operators": {
 			toComplete: "c",
@@ -111,7 +111,7 @@ func TestFilterCompletion(t *testing.T) {
 		"multi-level with 'customer%=' should return with nothing": {
 			toComplete: "customer%=",
 			path:       ProjectMultiLevelPath,
-			expect:     []string{},
+			expect:     []string(nil),
 		},
 		"multi-level with 'customer==customer1,' should return to complete": {
 			toComplete: "customer==customer1",
@@ -121,7 +121,7 @@ func TestFilterCompletion(t *testing.T) {
 		"multi-level with 'customer==customer1,' should return all vars": {
 			toComplete: "customer==customer1,",
 			path:       ProjectMultiLevelPath,
-			expect:     []string{"customer==customer1,customer", "customer==customer1,env", "customer==customer1,os", "customer==customer1,platform"},
+			expect:     []string{"customer==customer1,customer", "customer==customer1,env", "customer==customer1,os", "customer==customer1,platform", "customer==customer1,priority"},
 		},
 		"multi-level with 'customer==customer1,cus' should return customer with op": {
 			toComplete: "customer==customer1,cus",
