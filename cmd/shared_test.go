@@ -78,7 +78,11 @@ func TestFilterCompletion(t *testing.T) {
 			path:       ProjectMultiLevelPath,
 			expect:     []string{"platform==", "platform!=", "platform^=", "platform~=", "platform$="},
 		},
-
+		"multi-level with 'customer=' should return with values": {
+			toComplete: "customer=",
+			path:       ProjectMultiLevelPath,
+			expect:     []string{"customer==customer1", "customer==customer2", "customer==customer3"},
+		},
 		"multi-level with 'customer==' should return with values": {
 			toComplete: "customer==",
 			path:       ProjectMultiLevelPath,
@@ -119,13 +123,20 @@ func TestFilterCompletion(t *testing.T) {
 			path:       ProjectMultiLevelPath,
 			expect:     []string{"customer==customer1,customer", "customer==customer1,env", "customer==customer1,os", "customer==customer1,platform"},
 		},
+		"multi-level with 'customer==customer1,cus' should return customer with op": {
+			toComplete: "customer==customer1,cus",
+			path:       ProjectMultiLevelPath,
+			expect:     []string{"customer==customer1,customer==", "customer==customer1,customer!=", "customer==customer1,customer^=", "customer==customer1,customer~=", "customer==customer1,customer$="},
+		},
+		"multi-level with 'customer==customer1,customer==' should return values": {
+			toComplete: "customer==customer1,customer==",
+			path:       ProjectMultiLevelPath,
+			expect:     []string{"customer==customer1,customer==customer1", "customer==customer1,customer==customer2", "customer==customer1,customer==customer3"},
+		},
 	}
 
 	for testName, testCase := range testCases {
 		t.Run(testName, func(t *testing.T) {
-
-			fmt.Println()
-
 			actual, _ := filterCompletion(testCase.toComplete, testCase.path)
 			assert.Equal(t, testCase.expect, actual)
 		})
