@@ -24,6 +24,7 @@ func extractMultipleCompletion(toComplete string) (remainder string, current str
 	return
 }
 
+// TODO : Update regex to allow var with hyphen
 func filterCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
 	logrus.SetLevel(logrus.PanicLevel)
 
