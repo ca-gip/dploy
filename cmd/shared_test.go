@@ -150,11 +150,31 @@ func TestTagsCompletion(t *testing.T) {
 		path       string
 		playbook   string
 		expect     []string
-	}{"multi-level with black should return all vars": {
+	}{"no playbook should return nothing": {
+		toComplete: "",
+		path:       ProjectMultiLevelPath,
+		playbook:   "",
+		expect:     []string(nil),
+	}, "wrong path should return nothing": {
+		toComplete: "",
+		path:       "",
+		playbook:   "test.yml",
+		expect:     []string(nil),
+	}, "multi-level with blanck should return all vars": {
 		toComplete: "",
 		path:       ProjectMultiLevelPath,
 		playbook:   "test.yml",
 		expect:     []string{"existing-role", "playtag1", "role-1", "test1-tag", "test2-tag"},
+	}, "multi-level with 'r' return all role-1": {
+		toComplete: "r",
+		path:       ProjectMultiLevelPath,
+		playbook:   "test.yml",
+		expect:     []string{"role-1"},
+	}, "multi-level with 'playtag1,r' return all 'playtag1,role'": {
+		toComplete: "playtag1,r",
+		path:       ProjectMultiLevelPath,
+		playbook:   "test.yml",
+		expect:     []string{"playtag1,role-1"},
 	}}
 
 	for testName, testCase := range testCases {

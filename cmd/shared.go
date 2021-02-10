@@ -6,7 +6,6 @@ import (
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"regexp"
 	"strings"
 )
 
@@ -115,13 +114,12 @@ func playbookCompletion(toComplete string, path string) ([]string, cobra.ShellCo
 
 func tagsCompletion(toComplete string, path string, playbookPath string) ([]string, cobra.ShellCompDirective) {
 	logrus.SetLevel(logrus.PanicLevel)
-	var _ = regexp.MustCompile("([\\w-.\\/]+)([,]|)")
 
 	if len(playbookPath) == 0 {
-		return nil, cobra.ShellCompDirectiveDefault
+		return EmptyCompletion, cobra.ShellCompDirectiveDefault
 	}
-	project := ansible.Projects.LoadFromPath(path)
 
+	project := ansible.Projects.LoadFromPath(path)
 	playbook, err := project.PlaybookPath(playbookPath)
 
 	if err != nil {
@@ -129,5 +127,11 @@ func tagsCompletion(toComplete string, path string, playbookPath string) ([]stri
 		return EmptyCompletion, cobra.ShellCompDirectiveDefault
 	}
 
-	return playbook.AllTags().List(), cobra.ShellCompDirectiveDefault
+	remainder, current := extractMultipleCompletion(toComplete)
+
+	matches := utils.Filter(playbook.AllTags().List(), func(s string) bool {
+		return strings.HasPrefix(s, current)
+	})
+
+	return utils.AppendPrefixOnSlice(remainder, matches), cobra.ShellCompDirectiveDefault
 }
