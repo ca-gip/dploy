@@ -128,6 +128,7 @@ func tagsCompletion(toComplete string, path string, playbookPath string) ([]stri
 	}
 
 	remainder, current := extractMultipleCompletion(toComplete)
+	cobra.CompDebug(fmt.Sprintf("extract muitple: remainder:%s current:%s\n", remainder, current), true)
 
 	matches := utils.Filter(playbook.AllTags().List(), func(s string) bool {
 		return strings.HasPrefix(s, current)
