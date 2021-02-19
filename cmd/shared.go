@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/ca-gip/dploy/internal/ansible"
 	"github.com/ca-gip/dploy/internal/utils"
 	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"os"
 	"strings"
 )
 
@@ -135,4 +138,25 @@ func tagsCompletion(toComplete string, path string, playbookPath string) ([]stri
 	})
 
 	return utils.AppendPrefixOnSlice(remainder, matches), cobra.ShellCompDirectiveDefault
+}
+
+func askForConfirmation(s string) bool {
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		fmt.Printf("%s [y/n]: ", s)
+
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		response = strings.ToLower(strings.TrimSpace(response))
+
+		if response == "y" || response == "yes" {
+			return true
+		} else if response == "n" || response == "no" {
+			return false
+		}
+	}
 }

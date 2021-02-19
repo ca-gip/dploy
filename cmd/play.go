@@ -31,6 +31,13 @@ var playCmd = &cobra.Command{
 	Use:   "play",
 	Short: "Run ansible-playbook command",
 	Long:  `TODO...`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		curr, _ := os.Getwd()
+		generate(cmd, args, curr)
+		if !askForConfirmation("Do you confirm ?") {
+			log.Fatal("canceled...")
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		path, _ := os.Getwd()
 		play(cmd, args, path)
