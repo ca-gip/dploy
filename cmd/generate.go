@@ -97,6 +97,7 @@ func generate(cmd *cobra.Command, args []string, path string) {
 	askVaultPass, _ := cmd.Flags().GetBool("ask-vault-password")
 
 	commands := &ansible.Command{
+		Comment:           "# Commands :",
 		Inventory:         inventories,
 		Playbook:          playbook,
 		Tags:              tags,

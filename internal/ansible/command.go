@@ -7,6 +7,7 @@ import (
 )
 
 type Command struct {
+	Comment           string
 	Inventory         []*Inventory
 	Playbook          *Playbook
 	Tags              []string
@@ -18,7 +19,7 @@ type Command struct {
 	AskVaultPass      bool
 }
 
-var templateBash = `# Dploy commands :
+var templateBash = `{{ .Comment }}
 {{- range $inventory := .Inventory }}
 ansible-playbook -i {{ $inventory.RelativePath }} {{ $.Playbook.RelativePath }} 
 {{- if $.Tags}} -t {{ range $i,$tag := $.Tags }}{{if gt $i 0 }},{{end}}{{ $tag }}{{ end }}{{- end}}
