@@ -57,6 +57,23 @@ func init() {
 	playCmd.Flags().StringP("vault-password-file", utils.EmptyString, utils.EmptyString, "vault password file")
 	playCmd.Flags().StringSliceP("limit", "l", nil, "further limit selected hosts to an additional pattern")
 	playCmd.Flags().StringSliceP("tags", "t", nil, "only run plays and tasks tagged with these values")
+
+	// Completions
+	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		path, _ := os.Getwd()
+		return filterCompletion(toComplete, path)
+	})
+
+	_ = generateCmd.RegisterFlagCompletionFunc("playbook", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		path, _ := os.Getwd()
+		return playbookCompletion(toComplete, path)
+	})
+
+	_ = generateCmd.RegisterFlagCompletionFunc("tags", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		path, _ := os.Getwd()
+		playbookPath, _ := cmd.Flags().GetString("playbook")
+		return tagsCompletion(toComplete, path, playbookPath)
+	})
 }
 
 func play(cmd *cobra.Command, args []string, path string) {
