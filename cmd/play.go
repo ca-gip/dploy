@@ -16,14 +16,15 @@ limitations under the License.
 package cmd
 
 import (
-	ansibler "github.com/apenella/go-ansible"
+	"context"
+	"github.com/apenella/go-ansible/pkg/options"
+	"github.com/apenella/go-ansible/pkg/playbook"
 	"github.com/ca-gip/dploy/internal/ansible"
 	"github.com/ca-gip/dploy/internal/utils"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"os"
 	"strings"
-
-	"github.com/spf13/cobra"
 )
 
 // playCmd represents the play command
@@ -80,9 +81,9 @@ func play(cmd *cobra.Command, args []string, path string) {
 	// Load project from root
 	project := ansible.Projects.LoadFromPath(path)
 
-	// Retrieve playbook to be run
+	// Retrieve play to be run
 	playbookPath, _ := cmd.Flags().GetString("playbook")
-	playbook, err := project.PlaybookPath(playbookPath)
+	play, err := project.PlaybookPath(playbookPath)
 	if err != nil {
 		log.Fatalf(`%s not a valid path`, playbookPath)
 	}
@@ -99,19 +100,19 @@ func play(cmd *cobra.Command, args []string, path string) {
 
 	// Execute ansible for each inventory (sequential)
 	for _, inventory := range inventories {
-		ansiblePlaybookOptions := &ansibler.AnsiblePlaybookOptions{
+		ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 			Inventory:         inventory.RelativePath(),
 			Limit:             strings.Join(limit, ","),
 			Tags:              strings.Join(tags, ","),
 			VaultPasswordFile: vaultPassFile,
 		}
-		play := ansibler.AnsiblePlaybookCmd{
-			Playbook: playbook.RelativePath(),
-			Options:  ansiblePlaybookOptions,
+		play := playbook.AnsiblePlaybookCmd{
+			Playbooks: []string{play.RelativePath()},
+			Options:   ansiblePlaybookOptions,
 		}
 
-		ansibler.AnsibleForceColor()
-		err := play.Run()
+		options.AnsibleForceColor()
+		err := play.Run(context.TODO())
 		if err != nil {
 			log.Fatal(err)
 		}
