@@ -72,6 +72,30 @@ func (p Project) InventoryValues(key string) (values []string) {
 	return valueSet.List()
 }
 
+func (p Project) InventoryHost() (values []string) {
+	hostsSet := utils.NewSet()
+	for _, inventory := range p.Inventories {
+		if inventory.Data != nil {
+			for _, host := range inventory.Data.Groups["all"].Hosts {
+				hostsSet.Add(host.Name)
+			}
+		}
+	}
+	return hostsSet.List()
+}
+
+func (p Project) InventoryGroups() (values []string) {
+	groupSet := utils.NewSet()
+	for _, inventory := range p.Inventories {
+		if inventory.Data != nil {
+			for group, _ := range inventory.Data.Groups {
+				groupSet.Add(group)
+			}
+		}
+	}
+	return groupSet.List()
+}
+
 func (p Project) PlaybookPaths() (values []string) {
 	for _, playbook := range p.Playbooks {
 		values = append(values, playbook.RelativePath())

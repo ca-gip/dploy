@@ -111,8 +111,8 @@ func filterCompletion(toComplete string, path string) ([]string, cobra.ShellComp
 
 func playbookCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
 	logrus.SetLevel(logrus.PanicLevel)
-	k8s := ansible.Projects.LoadFromPath(path)
-	return k8s.PlaybookPaths(), cobra.ShellCompDirectiveDefault
+	project := ansible.Projects.LoadFromPath(path)
+	return project.PlaybookPaths(), cobra.ShellCompDirectiveDefault
 }
 
 func tagsCompletion(toComplete string, path string, playbookPath string) ([]string, cobra.ShellCompDirective) {
@@ -138,6 +138,12 @@ func tagsCompletion(toComplete string, path string, playbookPath string) ([]stri
 	})
 
 	return utils.AppendPrefixOnSlice(remainder, matches), cobra.ShellCompDirectiveDefault
+}
+
+func hostPatternCompletion(toComplete string, path string) ([]string, cobra.ShellCompDirective) {
+	logrus.SetLevel(logrus.PanicLevel)
+	project := ansible.Projects.LoadFromPath(path)
+	return append(project.InventoryHost(), project.InventoryGroups()...), cobra.ShellCompDirectiveDefault
 }
 
 func askForConfirmation(s string) bool {

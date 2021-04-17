@@ -60,17 +60,17 @@ func init() {
 	playCmd.Flags().StringSliceP("tags", "t", nil, "only run plays and tasks tagged with these values")
 
 	// Completions
-	_ = generateCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	_ = playCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		path, _ := os.Getwd()
 		return filterCompletion(toComplete, path)
 	})
 
-	_ = generateCmd.RegisterFlagCompletionFunc("playbook", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	_ = playCmd.RegisterFlagCompletionFunc("playbook", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		path, _ := os.Getwd()
 		return playbookCompletion(toComplete, path)
 	})
 
-	_ = generateCmd.RegisterFlagCompletionFunc("tags", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	_ = playCmd.RegisterFlagCompletionFunc("tags", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		path, _ := os.Getwd()
 		playbookPath, _ := cmd.Flags().GetString("playbook")
 		return tagsCompletion(toComplete, path, playbookPath)
@@ -106,6 +106,7 @@ func play(cmd *cobra.Command, args []string, path string) {
 			Tags:              strings.Join(tags, ","),
 			VaultPasswordFile: vaultPassFile,
 		}
+
 		play := playbook.AnsiblePlaybookCmd{
 			Playbooks: []string{play.RelativePath()},
 			Options:   ansiblePlaybookOptions,
