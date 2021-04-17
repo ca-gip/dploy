@@ -53,16 +53,25 @@ Filtering is based on the location where the command is executed as it will recu
 
 [![asciicast](https://asciinema.org/a/CJe2VHw7eftbp5J1onjBSsdtT.svg)](https://asciinema.org/a/CJe2VHw7eftbp5J1onjBSsdtT)
 
-### Play subcommand
+### Subcommands
+
+#### Play
 
 Launch a playbook
 ```bash
 dploy play --filter platform==os -p upgrade-proxy.yml
 ```
 
-### Exec subcommand
+Completion is available for :
+ * `--playbook` only yaml files that are valid playbooks will be shown 
+ * `--tags` a playbook must selected beforehand
+
+#### Exec
 
 Execute Ad Hoc command 
 ```bash
 dploy exec --filter customer==os -m ping -p lb
 ```
+
+Completion is available for :
+ * `--pattern` it will list all groups and host present in inventories files
