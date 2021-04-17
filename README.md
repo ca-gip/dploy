@@ -24,7 +24,7 @@ echo "source <(dploy completion bash)" >> ~/.bashrc
 ## Usage
 
 ```bash
-# dploy -h
+dploy -h
 Ansible deployment toolbox
 
 Usage:
