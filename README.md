@@ -43,7 +43,7 @@ Available Commands:
 All subcommand use a `--filter` arguments that will select inventories based on the vars declared under `[all:vars]` in *.ini files.
 
 Filter implement the following operators to match variable value:
- * Equal : `==`
+ * Equal `==`
  * NotEqual `!=`
  * EndWith `$=`
  * Contains `~=`
