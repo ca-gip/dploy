@@ -51,7 +51,7 @@ Filter implement the following operators to match variable value:
 
 Filtering is based on the location where the command is executed as it will recursively search all *.ini files.
 
-[![asciicast](https://asciinema.org/a/CJe2VHw7eftbp5J1onjBSsdtT.svg)](https://asciinema.org/a/CJe2VHw7eftbp5J1onjBSsdtT)
+![filtering](https://asciinema.org/a/CJe2VHw7eftbp5J1onjBSsdtT.svg)
 
 ### Play subcommand
 
