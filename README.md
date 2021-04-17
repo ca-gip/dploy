@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/ca-gip/dploy)](https://goreportcard.com/report/github.com/ca-gip/dploy)
 ![dowload](https://img.shields.io/github/downloads/ca-gip/dploy/total)
 
-`ploy` is a meta CLI for Ansible which enable multi inventory deployment while providing smart completion.
+`dploy` is a meta CLI for Ansible which enable multi inventory deployment while providing smart completion.
 
 It supports `ansible-playbook` and `ansible` command
 
