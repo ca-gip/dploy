@@ -53,7 +53,7 @@ Filtering is based on the location where the command is executed as it will recu
 
 
 <p align="center">
-  <img width="600" src="https://raw.githubusercontent.com/ca-gip/dploy/main/assets/filter.svg">
+  <img width="1000" src="https://raw.githubusercontent.com/ca-gip/dploy/main/assets/filter.svg">
 </p>
 
 ### Subcommands
