@@ -51,7 +51,11 @@ Filter implement the following operators to match variable value:
 
 Filtering is based on the location where the command is executed as it will recursively search all *.ini files.
 
-[![asciicast](https://asciinema.org/a/ixiopsdmn1jrVq94ywrUbnhy3.svg)](https://asciinema.org/a/ixiopsdmn1jrVq94ywrUbnhy3)
+
+<p align="center">
+  <img width="600" src="https://raw.githubusercontent.com/ca-gip/dploy/main/assets/filter.svg">
+</p>
+
 ### Subcommands
 
 #### Play
