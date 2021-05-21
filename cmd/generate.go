@@ -96,7 +96,7 @@ func generate(cmd *cobra.Command, args []string, path string) {
 	vaultPassFile, _ := cmd.Flags().GetString("vault-password-file")
 	askVaultPass, _ := cmd.Flags().GetBool("ask-vault-password")
 
-	commands := &ansible.Command{
+	commands := &ansible.PlaybookCmd{
 		Comment:           "# Commands :",
 		Inventory:         inventories,
 		Playbook:          playbook,
@@ -109,5 +109,5 @@ func generate(cmd *cobra.Command, args []string, path string) {
 		AskVaultPass:      askVaultPass,
 	}
 
-	commands.GenerateCmd()
+	commands.Generate()
 }

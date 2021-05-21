@@ -48,6 +48,9 @@ func init() {
 	execCmd.Flags().StringP("module", "m", utils.EmptyString, "module name to execute (default=command)")
 	execCmd.Flags().StringP("pattern", "p", utils.EmptyString, "host pattern")
 	execCmd.Flags().StringP("args", "a", utils.EmptyString, "module arguments")
+	execCmd.Flags().StringSliceP("extra-vars", "e", []string{}, "set additional variables as key=value or YAML/JSON, if filename prepend with @")
+
+	execCmd.Flags().IntP("background", "B", 0, "run asynchronously, failing after X seconds")
 
 	// Completions
 	_ = execCmd.RegisterFlagCompletionFunc("filter", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -60,6 +63,51 @@ func init() {
 		return hostPatternCompletion(toComplete, path)
 	})
 
+}
+
+func template(cmd *cobra.Command, args []string, path string) {
+	// Load project from root
+	project := ansible.Projects.LoadFromPath(path)
+
+	// Retrieve filter to select inventories
+	rawFilters, _ := cmd.Flags().GetStringSlice("filter")
+	filters := ansible.ParseFilterArgsFromSlice(rawFilters)
+	inventories := project.FilterInventory(filters)
+
+	// Retrieve ansible flags
+	module, _ := cmd.Flags().GetString("module")
+	pattern, _ := cmd.Flags().GetString("pattern")
+	arg, _ := cmd.Flags().GetString("args")
+	extra, _ := cmd.Flags().GetStringSlice("extra-vars")
+	background, _ := cmd.Flags().GetInt("background")
+
+	//
+	vars, err := varListToMap(extra)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	template := ansible.AdHocCmd{
+		Comment:           "# Commands",
+		Inventory:         inventories,
+		Pattern:           pattern,
+		ModuleName:        module,
+		ModuleArgs:        arg,
+		ExtraVars:         vars,
+		Background:        background,
+		Fork:              0,
+		PollInterval:      0,
+		Limit:             nil,
+		Check:             false,
+		Diff:              false,
+		OneLine:           false,
+		Tree:              false,
+		PlaybookDir:       "",
+		VaultPasswordFile: "",
+		AskVaultPass:      false,
+	}
+
+	template.Generate()
 }
 
 func exec(cmd *cobra.Command, args []string, path string) {
@@ -75,12 +123,21 @@ func exec(cmd *cobra.Command, args []string, path string) {
 	module, _ := cmd.Flags().GetString("module")
 	pattern, _ := cmd.Flags().GetString("pattern")
 	arg, _ := cmd.Flags().GetString("args")
+	background, _ := cmd.Flags().GetInt("background")
+	extra, _ := cmd.Flags().GetStringSlice("extra-vars")
+
+	vars, err := varListToMap(extra)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for _, inventory := range inventories {
 		ansibleAdhocOptions := &adhoc.AnsibleAdhocOptions{
+			Args:       arg,
+			Background: background,
+			ExtraVars:  vars,
 			Inventory:  inventory.RelativePath(),
 			ModuleName: module,
-			Args:       arg,
 		}
 
 		adhoc := &adhoc.AnsibleAdhocCmd{

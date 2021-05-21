@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"github.com/ca-gip/dploy/internal/ansible"
 	"github.com/ca-gip/dploy/internal/utils"
@@ -165,4 +166,19 @@ func askForConfirmation(s string) bool {
 			return false
 		}
 	}
+}
+
+func varListToMap(varsList []string) (map[string]interface{}, error) {
+	vars := map[string]interface{}{}
+
+	for _, v := range varsList {
+		tokens := strings.Split(v, "=")
+
+		if len(tokens) != 2 {
+			return nil, errors.New(fmt.Sprintf("Invalid extra variable format on '%s'", v))
+		}
+		vars[tokens[0]] = tokens[1]
+	}
+
+	return vars, nil
 }
