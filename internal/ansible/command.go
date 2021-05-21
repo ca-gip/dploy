@@ -1,6 +1,7 @@
 package ansible
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -95,7 +96,7 @@ func (o *AdHocCmd) AddExtraVar(name string, value interface{}) error {
 	}
 	_, exists := o.ExtraVars[name]
 	if exists {
-		return errors.New("(adhoc::AddExtraVar)", fmt.Sprintf("ExtraVar '%s' already exist", name))
+		return errors.New(fmt.Sprintf("ExtraVar '%s' already exist", name))
 	}
 
 	o.ExtraVars[name] = value

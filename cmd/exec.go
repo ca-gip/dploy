@@ -48,6 +48,7 @@ func init() {
 	execCmd.Flags().StringP("module", "m", utils.EmptyString, "module name to execute (default=command)")
 	execCmd.Flags().StringP("pattern", "p", utils.EmptyString, "host pattern")
 	execCmd.Flags().StringP("args", "a", utils.EmptyString, "module arguments")
+	_ = execCmd.MarkFlagRequired("args")
 	execCmd.Flags().StringSliceP("extra-vars", "e", []string{}, "set additional variables as key=value or YAML/JSON, if filename prepend with @")
 
 	execCmd.Flags().IntP("background", "B", 0, "run asynchronously, failing after X seconds")
