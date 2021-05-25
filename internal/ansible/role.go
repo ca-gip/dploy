@@ -32,7 +32,7 @@ func (role *Role) AllTags() *utils.Set {
 	return tags
 }
 
-// Gather inventory files LoadFromPath a Parent directory
+// LoadFromPath Gather inventory files LoadFromPath a Parent directory
 // Using a recursive scan. All non inventory files are ignored ( not .ini file )
 // All sub parent directory added like label in the inventory
 func (role *Role) LoadFromPath(rootPath string) (err error) {
@@ -52,6 +52,10 @@ func (role *Role) LoadFromPath(rootPath string) (err error) {
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
 
 			if de.IsDir() && !AnsibleValidRoleSubFolders.Contains(de.Name()) {
+				return nil
+			}
+
+			if strings.Contains(osPathname, "templates") {
 				return nil
 			}
 
