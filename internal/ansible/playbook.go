@@ -26,7 +26,11 @@ func (playbook *Playbook) AllTags() (tags *utils.Set) {
 	tags = utils.NewSet()
 	for _, play := range playbook.Plays {
 		tags.Concat(play.AllTags().List())
+		for _, role := range play.Roles {
+			tags.Concat(role.AllTags().List())
+		}
 	}
+
 	return
 }
 
