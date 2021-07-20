@@ -150,7 +150,7 @@ func exec(cmd *cobra.Command, args []string, path string) {
 		options.AnsibleForceColor()
 		err := adhoc.Run(context.TODO())
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 	}
 

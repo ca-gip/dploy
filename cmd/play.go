@@ -17,8 +17,10 @@ package cmd
 
 import (
 	"context"
+	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
 	"github.com/apenella/go-ansible/pkg/playbook"
+	"github.com/apenella/go-ansible/pkg/stdoutcallback/results"
 	"github.com/ca-gip/dploy/internal/ansible"
 	"github.com/ca-gip/dploy/internal/utils"
 	log "github.com/sirupsen/logrus"
@@ -98,6 +100,8 @@ func play(cmd *cobra.Command, args []string, path string) {
 	limit, _ := cmd.Flags().GetStringSlice("limit")
 	vaultPassFile, _ := cmd.Flags().GetString("vault-password-file")
 
+	summary := make(map[string]bool, len(inventories))
+
 	// Execute ansible for each inventory (sequential)
 	for _, inventory := range inventories {
 		ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
@@ -110,12 +114,21 @@ func play(cmd *cobra.Command, args []string, path string) {
 		play := playbook.AnsiblePlaybookCmd{
 			Playbooks: []string{play.RelativePath()},
 			Options:   ansiblePlaybookOptions,
+			Exec: execute.NewDefaultExecute(
+				execute.WithTransformers(
+					results.Prepend(inventory.RelativePath()),
+				)),
 		}
 
 		options.AnsibleForceColor()
 		err := play.Run(context.TODO())
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
+			summary[inventory.RelativePath()] = false
+		} else {
+			summary[inventory.RelativePath()] = true
 		}
 	}
+
+	log.Info(summary)
 }
