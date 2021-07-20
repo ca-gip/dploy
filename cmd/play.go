@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"github.com/apenella/go-ansible/pkg/execute"
 	"github.com/apenella/go-ansible/pkg/options"
 	"github.com/apenella/go-ansible/pkg/playbook"
@@ -36,7 +37,7 @@ var playCmd = &cobra.Command{
 	Long:  `TODO...`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		curr, _ := os.Getwd()
-		generate(cmd, args, curr)
+		templatePlaybookCommand(cmd, args, curr)
 		if !askForConfirmation("Do you confirm ?") {
 			log.Fatal("canceled...")
 		}
@@ -79,6 +80,47 @@ func init() {
 	})
 }
 
+func templatePlaybookCommand(cmd *cobra.Command, args []string, path string) {
+	// Load project from root
+	project := ansible.Projects.LoadFromPath(path)
+
+	// Retrieve playbook to be run
+	playbookPath, _ := cmd.Flags().GetString("playbook")
+	playbook, err := project.PlaybookPath(playbookPath)
+	if err != nil {
+		log.Fatalf(`%s not a valid path`, playbookPath)
+	}
+
+	// Retrieve filter to select inventories
+	rawFilters, _ := cmd.Flags().GetStringSlice("filter")
+	filters := ansible.ParseFilterArgsFromSlice(rawFilters)
+	inventories := project.FilterInventory(filters)
+
+	// Retrieve ansible flags
+	tags, _ := cmd.Flags().GetStringSlice("tags")
+	limit, _ := cmd.Flags().GetStringSlice("limit")
+	skipTags, _ := cmd.Flags().GetStringSlice("skip-tags")
+	check, _ := cmd.Flags().GetBool("check")
+	diff, _ := cmd.Flags().GetBool("diff")
+	vaultPassFile, _ := cmd.Flags().GetString("vault-password-file")
+	askVaultPass, _ := cmd.Flags().GetBool("ask-vault-password")
+
+	commands := &ansible.PlaybookCmd{
+		Comment:           "# Commands to be executed :",
+		Inventory:         inventories,
+		Playbook:          playbook,
+		Tags:              tags,
+		Limit:             limit,
+		SkipTags:          skipTags,
+		Check:             check,
+		Diff:              diff,
+		VaultPasswordFile: vaultPassFile,
+		AskVaultPass:      askVaultPass,
+	}
+
+	commands.Generate()
+}
+
 func play(cmd *cobra.Command, args []string, path string) {
 	// Load project from root
 	project := ansible.Projects.LoadFromPath(path)
@@ -103,7 +145,7 @@ func play(cmd *cobra.Command, args []string, path string) {
 	summary := make(map[string]bool, len(inventories))
 
 	// Execute ansible for each inventory (sequential)
-	for _, inventory := range inventories {
+	for index, inventory := range inventories {
 		ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 			Inventory:         inventory.RelativePath(),
 			Limit:             strings.Join(limit, ","),
@@ -121,6 +163,7 @@ func play(cmd *cobra.Command, args []string, path string) {
 		}
 
 		options.AnsibleForceColor()
+		fmt.Printf("Inventory %d/%d %s\n", index+1, len(inventories), inventory.RelativePath())
 		err := play.Run(context.TODO())
 		if err != nil {
 			log.Error(err)
@@ -130,5 +173,14 @@ func play(cmd *cobra.Command, args []string, path string) {
 		}
 	}
 
-	log.Info(summary)
+	fmt.Println("\nSummary :")
+	for inventory, state := range summary {
+		fmt.Printf("%s ", inventory)
+		if state {
+			fmt.Println("passed")
+		} else {
+			fmt.Println("failed")
+		}
+	}
+
 }

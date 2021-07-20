@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"github.com/apenella/go-ansible/pkg/adhoc"
 	"github.com/apenella/go-ansible/pkg/options"
 	"github.com/ca-gip/dploy/internal/ansible"
@@ -31,6 +32,13 @@ var execCmd = &cobra.Command{
 	Use:   "exec",
 	Short: "Run Ad Hoc command",
 	Long:  `TODO`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		curr, _ := os.Getwd()
+		templateAnsibleCommand(cmd, args, curr)
+		if !askForConfirmation("Do you confirm ?") {
+			log.Fatal("canceled...")
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		curr, _ := os.Getwd()
 		exec(cmd, args, curr)
@@ -67,7 +75,7 @@ func init() {
 
 }
 
-func template(cmd *cobra.Command, args []string, path string) {
+func templateAnsibleCommand(cmd *cobra.Command, args []string, path string) {
 	// Load project from root
 	project := ansible.Projects.LoadFromPath(path)
 
@@ -90,7 +98,7 @@ func template(cmd *cobra.Command, args []string, path string) {
 	}
 
 	template := ansible.AdHocCmd{
-		Comment:           "# Commands",
+		Comment:           "# Commands to be executed :",
 		Inventory:         inventories,
 		Pattern:           pattern,
 		ModuleName:        module,
@@ -133,7 +141,7 @@ func exec(cmd *cobra.Command, args []string, path string) {
 		log.Fatal(err)
 	}
 
-	for _, inventory := range inventories {
+	for index, inventory := range inventories {
 		ansibleAdhocOptions := &adhoc.AnsibleAdhocOptions{
 			Args:       arg,
 			Background: background,
@@ -148,6 +156,7 @@ func exec(cmd *cobra.Command, args []string, path string) {
 		}
 
 		options.AnsibleForceColor()
+		fmt.Printf("Inventory %d/%d %s\n", index+1, len(inventories), inventory.RelativePath())
 		err := adhoc.Run(context.TODO())
 		if err != nil {
 			log.Error(err)

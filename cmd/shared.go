@@ -151,7 +151,7 @@ func askForConfirmation(s string) bool {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Printf("%s [y/n]: ", s)
+		fmt.Printf("%s [Y/n]: ", s)
 
 		response, err := reader.ReadString('\n')
 		if err != nil {
@@ -160,7 +160,7 @@ func askForConfirmation(s string) bool {
 
 		response = strings.ToLower(strings.TrimSpace(response))
 
-		if response == "y" || response == "yes" {
+		if response == "y" || response == "yes" || response == "" {
 			return true
 		} else if response == "n" || response == "no" {
 			return false

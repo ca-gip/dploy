@@ -63,9 +63,8 @@ type AdHocCmd struct {
 
 var AdHocCmdTemplate = `{{ .Comment }}
 {{- range $inventory := .Inventory }}
-ansible {{ $.Pattern }} -a {{ $.ModuleArgs }} 
+ansible {{ $.Pattern }} -i {{ $inventory.RelativePath }} -a {{ $.ModuleArgs }} 
 {{- if $.ModuleName }} -m {{ $.ModuleName }}{{- end }}
--i {{ $inventory.RelativePath }}
 {{- if $.ExtraVars }} -e {{ $.ExtraVars }}{{- end }}
 {{- if $.Background }} --background {{ $.Background }}{{- end }}
 {{- if $.Fork }} --forks {{ $.Fork }}{{- end }}
