@@ -78,3 +78,10 @@ dploy exec --filter customer==os -m ping -p lb
 
 Completion is available for :
  * `--pattern` it will list all groups and host present in inventories files
+
+<hr/>
+<p align=center  style="background-color:#333333 !important;">
+  Developed with
+  <br/>
+  <img align="center" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="drawing" width="100"/>
+</p>
